@@ -21,10 +21,16 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
   const { html, url, selector, scale = 1, format, fitMode = 'contain' } = options;
 
   const page = await browserService.getPage();
+  let released = false;
 
-  const timeout = setTimeout(async () => {
-    await browserService.releasePage(page);
-  }, 15000);
+  const releasePage = async () => {
+    if (!released) {
+      released = true;
+      await browserService.releasePage(page);
+    }
+  };
+
+  const timeout = setTimeout(() => { void releasePage(); }, 15000);
 
   try {
     await page.emulateMediaType('screen');
@@ -113,6 +119,6 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
     }
   } finally {
     clearTimeout(timeout);
-    await browserService.releasePage(page);
+    await releasePage();
   }
 }
