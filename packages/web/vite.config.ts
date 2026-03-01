@@ -5,11 +5,7 @@ import { lingui } from '@lingui/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        plugins: ['macros'],
-      },
-    }),
+    react(),
     vanillaExtractPlugin(),
     lingui(),
   ],
