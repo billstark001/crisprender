@@ -1,0 +1,66 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"MIME-Version: 1.0\n"
+"Language: en\n"
+
+msgid "CrispRender"
+msgstr "CrispRender"
+
+msgid "Vector-perfect PDF rendering from HTML"
+msgstr "Vector-perfect PDF rendering from HTML"
+
+msgid "HTML Content"
+msgstr "HTML Content"
+
+msgid "Paste your HTML here..."
+msgstr "Paste your HTML here..."
+
+msgid "URL"
+msgstr "URL"
+
+msgid "https://example.com"
+msgstr "https://example.com"
+
+msgid "CSS Selector"
+msgstr "CSS Selector"
+
+msgid "#main or .content"
+msgstr "#main or .content"
+
+msgid "Scale"
+msgstr "Scale"
+
+msgid "Paper Format"
+msgstr "Paper Format"
+
+msgid "None (Illustration)"
+msgstr "None (Illustration)"
+
+msgid "Fit Mode"
+msgstr "Fit Mode"
+
+msgid "Contain"
+msgstr "Contain"
+
+msgid "None"
+msgstr "None"
+
+msgid "Generate PDF"
+msgstr "Generate PDF"
+
+msgid "Generating..."
+msgstr "Generating..."
+
+msgid "Download PDF"
+msgstr "Download PDF"
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Powered by Chromium & Hono"
+msgstr "Powered by Chromium & Hono"
+
+msgid "An error occurred. Please try again."
+msgstr "An error occurred. Please try again."

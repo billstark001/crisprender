@@ -1,0 +1,66 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"MIME-Version: 1.0\n"
+"Language: zh\n"
+
+msgid "CrispRender"
+msgstr "CrispRender"
+
+msgid "Vector-perfect PDF rendering from HTML"
+msgstr "从HTML生成矢量完美的PDF"
+
+msgid "HTML Content"
+msgstr "HTML内容"
+
+msgid "Paste your HTML here..."
+msgstr "在此粘贴HTML..."
+
+msgid "URL"
+msgstr "网址"
+
+msgid "https://example.com"
+msgstr "https://example.com"
+
+msgid "CSS Selector"
+msgstr "CSS选择器"
+
+msgid "#main or .content"
+msgstr "#main 或 .content"
+
+msgid "Scale"
+msgstr "缩放比例"
+
+msgid "Paper Format"
+msgstr "纸张格式"
+
+msgid "None (Illustration)"
+msgstr "无（插图模式）"
+
+msgid "Fit Mode"
+msgstr "适应模式"
+
+msgid "Contain"
+msgstr "包含"
+
+msgid "None"
+msgstr "无"
+
+msgid "Generate PDF"
+msgstr "生成PDF"
+
+msgid "Generating..."
+msgstr "生成中..."
+
+msgid "Download PDF"
+msgstr "下载PDF"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Powered by Chromium & Hono"
+msgstr "由 Chromium 和 Hono 驱动"
+
+msgid "An error occurred. Please try again."
+msgstr "发生错误，请重试。"
