@@ -1,0 +1,66 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"MIME-Version: 1.0\n"
+"Language: ja\n"
+
+msgid "CrispRender"
+msgstr "CrispRender"
+
+msgid "Vector-perfect PDF rendering from HTML"
+msgstr "HTMLからベクター完全なPDFを生成"
+
+msgid "HTML Content"
+msgstr "HTMLコンテンツ"
+
+msgid "Paste your HTML here..."
+msgstr "ここにHTMLを貼り付けてください..."
+
+msgid "URL"
+msgstr "URL"
+
+msgid "https://example.com"
+msgstr "https://example.com"
+
+msgid "CSS Selector"
+msgstr "CSSセレクター"
+
+msgid "#main or .content"
+msgstr "#main または .content"
+
+msgid "Scale"
+msgstr "スケール"
+
+msgid "Paper Format"
+msgstr "用紙サイズ"
+
+msgid "None (Illustration)"
+msgstr "なし（イラストモード）"
+
+msgid "Fit Mode"
+msgstr "フィットモード"
+
+msgid "Contain"
+msgstr "含む"
+
+msgid "None"
+msgstr "なし"
+
+msgid "Generate PDF"
+msgstr "PDFを生成"
+
+msgid "Generating..."
+msgstr "生成中..."
+
+msgid "Download PDF"
+msgstr "PDFをダウンロード"
+
+msgid "Language"
+msgstr "言語"
+
+msgid "Powered by Chromium & Hono"
+msgstr "Chromium と Hono で動作"
+
+msgid "An error occurred. Please try again."
+msgstr "エラーが発生しました。もう一度お試しください。"

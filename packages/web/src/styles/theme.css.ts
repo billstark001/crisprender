@@ -1,0 +1,57 @@
+import { createGlobalTheme } from '@vanilla-extract/css';
+
+export const vars = createGlobalTheme(':root', {
+  color: {
+    primary: '#3B82F6',
+    primaryHover: '#2563EB',
+    primaryLight: '#DBEAFE',
+    secondary: '#60A5FA',
+    accent: '#8B5CF6',
+    bgBase: '#F9FAFB',
+    bgMuted: '#F3F4F6',
+    bgWhite: '#FFFFFF',
+    border: '#E5E7EB',
+    borderFocus: '#3B82F6',
+    textPrimary: '#111827',
+    textSecondary: '#6B7280',
+    textMuted: '#9CA3AF',
+    danger: '#EF4444',
+    success: '#10B981',
+  },
+  space: {
+    '1': '4px',
+    '2': '8px',
+    '3': '12px',
+    '4': '16px',
+    '5': '20px',
+    '6': '24px',
+    '8': '32px',
+    '10': '40px',
+    '12': '48px',
+  },
+  radius: {
+    sm: '4px',
+    md: '8px',
+    lg: '12px',
+    xl: '16px',
+    full: '9999px',
+  },
+  font: {
+    sans: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    mono: '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+  },
+  fontSize: {
+    xs: '12px',
+    sm: '14px',
+    md: '16px',
+    lg: '18px',
+    xl: '20px',
+    '2xl': '24px',
+    '3xl': '30px',
+  },
+  shadow: {
+    sm: '0 1px 2px 0 rgba(0,0,0,0.05)',
+    md: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
+    lg: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+  },
+});

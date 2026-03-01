@@ -1,0 +1,13 @@
+{
+  "name": "crisprender",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter './packages/*' run dev",
+    "build": "pnpm --filter @crisprender/web run build && pnpm --filter @crisprender/server run build",
+    "start": "pnpm --filter @crisprender/server run start"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

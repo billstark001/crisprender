@@ -1,0 +1,34 @@
+{
+  "name": "@crisprender/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "extract": "lingui extract",
+    "compile": "lingui compile"
+  },
+  "dependencies": {
+    "@lingui/core": "^5.3.2",
+    "@lingui/react": "^5.3.2",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-toast": "^1.2.6",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "@vanilla-extract/css": "^1.17.0",
+    "@vanilla-extract/recipes": "^0.5.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@lingui/cli": "^5.3.2",
+    "@lingui/vite-plugin": "^5.3.2",
+    "@lingui/macro": "^5.3.2",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vanilla-extract/vite-plugin": "^5.1.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
+}
