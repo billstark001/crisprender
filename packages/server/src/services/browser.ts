@@ -8,8 +8,13 @@ const BLOCKED_URL_PATTERNS = [
   'doubleclick.net',
 ];
 
+/** Maximum number of Puppeteer pages open concurrently. */
+export const MAX_CONCURRENT_PAGES = Number(process.env.MAX_CONCURRENT_PAGES ?? 5);
+
 class BrowserService {
   private browser: Browser | null = null;
+  /** Tracks open pages to enforce the concurrency cap. */
+  private readonly openPages = new Set<Page>();
 
   private async launch(): Promise<Browser> {
     const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
@@ -39,6 +44,10 @@ class BrowserService {
   }
 
   async getPage(): Promise<Page> {
+    if (this.openPages.size >= MAX_CONCURRENT_PAGES) {
+      throw new Error('Server busy: too many concurrent rendering requests');
+    }
+
     let browser: Browser;
     try {
       browser = await this.getBrowser();
@@ -47,6 +56,7 @@ class BrowserService {
     }
 
     const page = await browser.newPage();
+    this.openPages.add(page);
 
     await page.setRequestInterception(true);
     page.on('request', (req) => {
@@ -65,6 +75,8 @@ class BrowserService {
   }
 
   async releasePage(page: Page): Promise<void> {
+    if (!this.openPages.has(page)) return; // guard against double-release
+    this.openPages.delete(page);
     await page.close();
   }
 

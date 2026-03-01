@@ -10,6 +10,16 @@ docker compose up -d
 
 Open http://localhost:3000 in your browser.
 
+## Quick Start (local, no Docker)
+
+```bash
+pnpm install
+cp .env.example packages/server/.env
+pnpm dev          # starts backend :3000 and frontend :5173 in parallel
+```
+
+See [docs/development.md](docs/development.md) for full setup instructions and troubleshooting.
+
 ## API
 
 ### `POST /api/v1/pdf/generate`
@@ -37,12 +47,7 @@ curl -X POST http://localhost:3000/api/v1/pdf/generate \
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Development](docs/development.md)
 - [Deployment](docs/deployment.md)
-
-## Local Development
-
-```bash
-pnpm install
-pnpm --filter @crisprender/server run dev
-pnpm --filter @crisprender/web run dev
-```
+- [Security](docs/security.md)
+- [Load Balancing](docs/load-balancing.md)

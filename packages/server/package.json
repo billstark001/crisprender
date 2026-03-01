@@ -9,8 +9,9 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "hono": "^4.12.3",
     "@hono/node-server": "^1.19.9",
+    "hono": "^4.12.3",
+    "hono-rate-limiter": "^0.5.3",
     "puppeteer": "^24.37.5",
     "puppeteer-cluster": "^0.25.0"
   },

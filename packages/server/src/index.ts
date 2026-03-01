@@ -1,13 +1,53 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { secureHeaders } from 'hono/secure-headers';
+import { bodyLimit } from 'hono/body-limit';
+import { timeout } from 'hono/timeout';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
+import { rateLimiter } from 'hono-rate-limiter';
 import { pdfRoutes } from './routes/pdf.js';
 import { browserService } from './services/browser.js';
 
 const app = new Hono();
 
+// Security headers (X-Frame-Options, X-Content-Type-Options, etc.)
+app.use('*', secureHeaders());
+
+// CORS
 app.use('*', cors());
+
+// Rate limiting: max PDF-generate requests per minute per IP
+app.use(
+  '/api/v1/pdf/generate',
+  rateLimiter({
+    windowMs: 60 * 1000,
+    limit: Number(process.env.RATE_LIMIT ?? 20),
+    standardHeaders: 'draft-6',
+    keyGenerator: (c) => {
+      const ip =
+        c.req.header('x-forwarded-for')?.split(',')[0].trim() ??
+        c.req.header('x-real-ip');
+      if (!ip) {
+        // Reject requests with no identifiable client IP
+        throw new Error('Unable to determine client IP');
+      }
+      return ip;
+    },
+  }),
+);
+
+// Hard per-request timeout (18 s – slightly above the renderer's 15 s)
+app.use('/api/v1/pdf/*', timeout(18000));
+
+// Limit raw request body to 11 MB (renderer enforces 10 MB on the HTML string)
+app.use(
+  '/api/v1/pdf/*',
+  bodyLimit({
+    maxSize: 11 * 1024 * 1024,
+    onError: (c) => c.json({ error: 'Request body too large' }, 413),
+  }),
+);
 
 // AdSense injection middleware
 const adsenseClient = process.env.ADSENSE_CLIENT;

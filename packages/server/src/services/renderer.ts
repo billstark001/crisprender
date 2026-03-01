@@ -17,8 +17,44 @@ interface BoundingBox {
   height: number;
 }
 
+/** Maximum HTML payload accepted (10 MB). */
+const MAX_HTML_BYTES = Number(process.env.MAX_HTML_BYTES ?? 10 * 1024 * 1024);
+
+/**
+ * Private/reserved IP ranges blocked to prevent SSRF attacks.
+ * Covers: loopback, link-local (169.254/16), RFC-1918, CGNAT (100.64/10),
+ * benchmark (198.18/15), IPv6 loopback (::1), ULA (fc00::/7), link-local (fe80::/10).
+ */
+const SSRF_BLOCK_RE =
+  /^https?:\/\/(localhost|127\.|0\.0\.0|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.|198\.(1[89])\.|::1|fc[0-9a-f]{2}:|fd[0-9a-f]{2}:|fe80:)/i;
+
+function assertSafeUrl(url: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error('Invalid URL');
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('Only http and https URLs are allowed');
+  }
+  if (SSRF_BLOCK_RE.test(url)) {
+    throw new Error('URL resolves to a private or loopback address');
+  }
+}
+
 export async function renderPdf(options: RenderOptions): Promise<Buffer> {
   const { html, url, selector, scale = 1, format, fitMode = 'contain' } = options;
+
+  // Validate HTML size
+  if (html && Buffer.byteLength(html, 'utf8') > MAX_HTML_BYTES) {
+    throw new Error(`HTML payload exceeds the ${MAX_HTML_BYTES / 1024 / 1024} MB limit`);
+  }
+
+  // SSRF guard for URL mode
+  if (url) {
+    assertSafeUrl(url);
+  }
 
   const page = await browserService.getPage();
   let released = false;

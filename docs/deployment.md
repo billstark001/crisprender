@@ -10,11 +10,14 @@ The service will be available at http://localhost:3000.
 
 ## Environment Variables
 
-| Variable              | Default | Description                          |
-|-----------------------|---------|--------------------------------------|
-| `PORT`                | `3000`  | HTTP port to listen on               |
-| `ADSENSE_CLIENT`      | *(empty)* | Google AdSense publisher ID        |
-| `PUPPETEER_EXECUTABLE_PATH` | *(bundled)* | Path to Chromium binary    |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3000` | HTTP port to listen on |
+| `ADSENSE_CLIENT` | *(empty)* | Google AdSense publisher ID |
+| `PUPPETEER_EXECUTABLE_PATH` | *(bundled)* | Path to Chromium binary |
+| `MAX_CONCURRENT_PAGES` | `5` | Maximum concurrent Puppeteer pages |
+| `MAX_HTML_BYTES` | `10485760` | Maximum HTML payload in bytes (10 MB) |
+| `RATE_LIMIT` | `20` | Requests per minute per IP on the generate endpoint |
 
 ## Local Development
 
