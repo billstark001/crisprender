@@ -13,21 +13,39 @@ import { extractMetaOptionsFromHtml, type MetaRenderOptions } from '@/utils/meta
 import { form, formLayout, formSide, row, resultArea, errorText, successLink } from './RenderForm.css.js';
 import { MessageDescriptor } from '@lingui/core';
 
+function extractSuggestedName(source: HtmlSourceValue): string {
+  if (!source) return 'output';
+  if (source.type === 'file') {
+    return source.fileName.replace(/\.[^.]+$/, '') || 'output';
+  }
+  if (source.type === 'url') {
+    try {
+      return new URL(source.url).hostname.replace(/^www\./, '') || 'output';
+    } catch {
+      return 'output';
+    }
+  }
+  // html type: try to extract <title>
+  const match = source.content.match(/<title[^>]*>([^<]+)<\/title>/i);
+  return match ? match[1].trim().replace(/[/\\:*?"<>|]+/g, '_') || 'output' : 'output';
+}
+
 
 
 interface ResultAreaProps {
   pdfUrl: string | null;
   error: string | null;
+  suggestedName?: string;
 }
 
-export function ResultArea({ pdfUrl, error }: ResultAreaProps) {
+export function ResultArea({ pdfUrl, error, suggestedName = 'output' }: ResultAreaProps) {
   const { i18n } = useLingui();
   if (!pdfUrl && !error) return null;
   return (
     <div className={resultArea}>
       {error && <p className={errorText}>{error}</p>}
       {pdfUrl && (
-        <a className={successLink} href={pdfUrl} download="output.pdf">
+        <a className={successLink} href={pdfUrl} download={`${suggestedName}.pdf`}>
           {i18n._(msg`Download PDF`)}
         </a>
       )}
@@ -68,6 +86,7 @@ export function RenderForm() {
   const defaultFitMode = i18n._(FITMODE_LABELS['contain']!);
 
   const [htmlSource, setHtmlSource] = useState<HtmlSourceValue>(null);
+  const [suggestedName, setSuggestedName] = useState('output');
   const [selector, setSelector] = useState('');
   const [scale, setScale] = useState('');
   const [format, setFormat] = useState('');
@@ -93,6 +112,7 @@ export function RenderForm() {
     } else {
       setDetectedMeta({});
     }
+    setSuggestedName(extractSuggestedName(htmlSource));
   }, [htmlSource]);
 
   const generateMetaTags = (): string => {
@@ -271,7 +291,7 @@ export function RenderForm() {
         </form>
       </Card>
 
-      <ResultArea pdfUrl={pdfUrl} error={error} />
+      <ResultArea pdfUrl={pdfUrl} error={error} suggestedName={suggestedName} />
       <MetaHelpDialog open={showHelpDialog} onClose={() => setShowHelpDialog(false)} />
     </>
   );
