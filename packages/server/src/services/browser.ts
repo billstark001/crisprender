@@ -1,4 +1,7 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { createLogger } from '../utils/logger.js';
+
+const log = createLogger('browser');
 
 const BLOCKED_URL_PATTERNS = [
   '.mp4',
@@ -30,6 +33,7 @@ class BrowserService {
     });
 
     this.browser.on('disconnected', () => {
+      log.warn('Puppeteer browser disconnected');
       this.browser = null;
     });
 
@@ -45,13 +49,15 @@ class BrowserService {
 
   async getPage(): Promise<Page> {
     if (this.openPages.size >= MAX_CONCURRENT_PAGES) {
+      log.warn({ openPages: this.openPages.size, max: MAX_CONCURRENT_PAGES }, 'Concurrency limit reached');
       throw new Error('Server busy: too many concurrent rendering requests');
     }
 
     let browser: Browser;
     try {
       browser = await this.getBrowser();
-    } catch {
+    } catch (err) {
+      log.warn({ err }, 'Browser unavailable, relaunching');
       browser = await this.launch();
     }
 
@@ -82,6 +88,7 @@ class BrowserService {
 
   async close(): Promise<void> {
     if (this.browser) {
+      log.info('Closing Puppeteer browser');
       await this.browser.close();
       this.browser = null;
     }

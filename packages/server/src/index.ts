@@ -8,6 +8,9 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { rateLimiter } from 'hono-rate-limiter';
 import { pdfRoutes } from './routes/pdf.js';
 import { browserService } from './services/browser.js';
+import { createLogger } from './utils/logger.js';
+
+const log = createLogger('server');
 
 const app = new Hono();
 
@@ -78,12 +81,12 @@ app.use('/*', serveStatic({ root: './public' }));
 const port = Number(process.env.PORT ?? 3000);
 
 const server = serve({ fetch: app.fetch, port }, () => {
-  console.log(`CrispRender server running on http://localhost:${port}`);
+  log.info({ port }, `CrispRender server running on http://localhost:${port}`);
 });
 
 // Graceful shutdown
 const shutdown = async () => {
-  console.log('Shutting down...');
+  log.info('Shutting down...');
   await browserService.close();
   server.close();
   process.exit(0);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/macro';
-import { Textarea } from './Input.js';
+import { Textarea } from '@/components/Input.js';
 import {
   tabsRoot,
   tabsList,
@@ -14,7 +14,7 @@ import {
   fileUploadHint,
   fileUploadName,
 } from './HtmlSourceTabs.css.js';
-import { Input } from './Input.js';
+import { Input } from '@/components/Input.js';
 
 export type HtmlSourceValue =
   | { type: 'html'; content: string }

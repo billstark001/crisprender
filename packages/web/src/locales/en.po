@@ -12,96 +12,249 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/pages/Home.tsx:134
+#: src/pages/home/RenderForm.tsx:66
+msgid "(default)"
+msgstr "(default)"
+
+#: src/pages/home/RenderForm.tsx:65
+msgid "(meta)"
+msgstr "(meta)"
+
+#: src/pages/home/RenderForm.tsx:211
 msgid "#main or .content"
 msgstr "#main or .content"
 
-#: src/components/HtmlSourceTabs.tsx:141
+#: src/pages/home/AdvancedOptions.tsx:69
+msgid "0 (default)"
+msgstr "0 (default)"
+
+#: src/pages/home/RenderForm.tsx:226
+#~ msgid "1 (default)"
+#~ msgstr "1 (default)"
+
+#: src/pages/home/AdvancedOptions.tsx:40
+msgid "1280 (default)"
+msgstr "1280 (default)"
+
+#: src/pages/home/AdvancedOptions.tsx:54
+msgid "900 (default)"
+msgstr "900 (default)"
+
+#: src/pages/home/HtmlSourceTabs.tsx:141
 msgid "Accepts .html, .htm"
 msgstr "Accepts .html, .htm"
 
-#: src/pages/Home.tsx:90
+#: src/pages/home/RenderForm.tsx:183
 msgid "An error occurred. Please try again."
 msgstr "An error occurred. Please try again."
 
-#: src/components/HtmlSourceTabs.tsx:139
+#: src/pages/home/MetaHelpDialog.tsx:54
+msgid "Available options"
+msgstr "Available options"
+
+#: src/pages/home/HtmlSourceTabs.tsx:139
 msgid "Click or drag an HTML file here"
 msgstr "Click or drag an HTML file here"
 
-#~ msgid "Contain"
-#~ msgstr "Contain"
+#: src/pages/home/RenderForm.tsx:48
+msgid "Contain"
+msgstr "Contain"
 
-#: src/pages/Home.tsx:115
+#: src/pages/Home.tsx:296
+#~ msgid "contain (default)"
+#~ msgstr "contain (default)"
+
+#: src/pages/home/MetaTagPanel.tsx:60
+msgid "Copied!"
+msgstr "Copied!"
+
+#: src/pages/home/MetaTagPanel.tsx:60
+msgid "Copy meta tags"
+msgstr "Copy meta tags"
+
+#: src/pages/home/Home.tsx:15
 msgid "CrispRender"
 msgstr "CrispRender"
 
-#: src/pages/Home.tsx:133
+#: src/pages/home/RenderForm.tsx:207
 msgid "CSS Selector"
 msgstr "CSS Selector"
 
-#: src/pages/Home.tsx:179
+#: src/pages/home/MetaHelpDialog.tsx:60
+#: src/pages/home/RenderForm.tsx:42
+#: src/pages/home/RenderForm.tsx:47
+msgid "Default"
+msgstr "Default"
+
+#: src/pages/home/RenderForm.tsx:63
+#~ msgid "Default - Contain"
+#~ msgstr "Default - Contain"
+
+#: src/pages/home/RenderForm.tsx:50
+#~ msgid "Default - None (Illustration)"
+#~ msgstr "Default - None (Illustration)"
+
+#: src/pages/home/RenderForm.tsx:31
 msgid "Download PDF"
 msgstr "Download PDF"
 
-#: src/components/HtmlSourceTabs.tsx:106
+#: src/pages/home/MetaHelpDialog.tsx:117
+msgid "Example"
+msgstr "Example"
+
+#: src/pages/home/HtmlSourceTabs.tsx:106
 msgid "File"
 msgstr "File"
 
-#: src/pages/Home.tsx:160
+#: src/pages/home/RenderForm.tsx:247
 msgid "Fit Mode"
 msgstr "Fit Mode"
 
-#: src/pages/Home.tsx:167
+#: src/pages/home/MetaHelpDialog.tsx:93
+msgid "fitMode example"
+msgstr "fitMode example"
+
+#: src/pages/home/MetaHelpDialog.tsx:87
+msgid "For each option CrispRender tries every combination of 4 case styles × 4 prefixes (first match wins)."
+msgstr "For each option CrispRender tries every combination of 4 case styles × 4 prefixes (first match wins)."
+
+#: src/pages/home/MetaTagPanel.tsx:58
+msgid "Form values override meta tags"
+msgstr "Form values override meta tags"
+
+#: src/pages/home/RenderForm.tsx:267
 msgid "Generate PDF"
 msgstr "Generate PDF"
 
-#: src/pages/Home.tsx:167
+#: src/pages/home/RenderForm.tsx:267
 msgid "Generating..."
 msgstr "Generating..."
 
-#: src/components/HtmlSourceTabs.tsx:103
+#: src/pages/home/AdvancedOptions.tsx:26
+msgid "Hide advanced options ▲"
+msgstr "Hide advanced options ▲"
+
+#: src/pages/home/HtmlSourceTabs.tsx:103
 msgid "HTML"
 msgstr "HTML"
 
-#: src/components/HtmlSourceTabs.tsx:116
+#: src/pages/home/HtmlSourceTabs.tsx:116
 msgid "HTML Content"
 msgstr "HTML Content"
 
-#: src/components/HtmlSourceTabs.tsx:149
+#: src/pages/home/HtmlSourceTabs.tsx:149
 msgid "https://example.com"
 msgstr "https://example.com"
 
 #~ msgid "Language"
 #~ msgstr "Language"
 
-#~ msgid "None"
-#~ msgstr "None"
+#: src/pages/home/MetaTagPanel.tsx:26
+#: src/pages/home/MetaTagPanel.tsx:27
+msgid "Learn how to use meta tags"
+msgstr "Learn how to use meta tags"
 
-#: src/pages/Home.tsx:155
+#: src/pages/home/MetaTagPanel.tsx:21
+msgid "Meta tag options"
+msgstr "Meta tag options"
+
+#: src/components/MetaHelpDialog.tsx:39
+#~ msgid "Meta Tag Options"
+#~ msgstr "Meta Tag Options"
+
+#: src/pages/Home.tsx:157
+#~ msgid "Meta tags detected in HTML"
+#~ msgstr "Meta tags detected in HTML"
+
+#: src/pages/home/MetaHelpDialog.tsx:85
+msgid "Naming convention"
+msgstr "Naming convention"
+
+#: src/pages/home/MetaTagPanel.tsx:55
+msgid "No meta tags detected in this HTML"
+msgstr "No meta tags detected in this HTML"
+
+#: src/pages/home/RenderForm.tsx:49
+msgid "None"
+msgstr "None"
+
+#: src/pages/home/RenderForm.tsx:43
 msgid "None (Illustration)"
 msgstr "None (Illustration)"
 
-#: src/pages/Home.tsx:151
+#: src/pages/Home.tsx:283
+#~ msgid "None (Illustration) — default"
+#~ msgstr "None (Illustration) — default"
+
+#: src/pages/home/MetaHelpDialog.tsx:58
+msgid "Option"
+msgstr "Option"
+
+#: src/pages/home/RenderForm.tsx:234
 msgid "Paper Format"
 msgstr "Paper Format"
 
-#: src/components/HtmlSourceTabs.tsx:117
+#: src/pages/home/HtmlSourceTabs.tsx:117
 msgid "Paste your HTML here..."
 msgstr "Paste your HTML here..."
 
-#: src/pages/Home.tsx:187
+#: src/pages/home/Home.tsx:25
 msgid "Powered by Chromium & Hono"
 msgstr "Powered by Chromium & Hono"
 
-#: src/pages/Home.tsx:142
+#: src/pages/home/MetaHelpDialog.tsx:111
+msgid "Prefixes in order: crisprender · crisp-render · cr · (none)"
+msgstr "Prefixes in order: crisprender · crisp-render · cr · (none)"
+
+#: src/pages/home/RenderForm.tsx:220
 msgid "Scale"
 msgstr "Scale"
 
-#: src/components/HtmlSourceTabs.tsx:109
-#: src/components/HtmlSourceTabs.tsx:148
+#: src/pages/home/AdvancedOptions.tsx:26
+msgid "Show advanced options ▼"
+msgstr "Show advanced options ▼"
+
+#: src/pages/home/MetaHelpDialog.tsx:92
+msgid "Style"
+msgstr "Style"
+
+#: src/pages/home/MetaHelpDialog.tsx:120
+msgid "The legacy name \"pdf-target-selector\" is also accepted as an alias for \"selector\"."
+msgstr "The legacy name \"pdf-target-selector\" is also accepted as an alias for \"selector\"."
+
+#: src/pages/home/MetaHelpDialog.tsx:59
+msgid "Type"
+msgstr "Type"
+
+#: src/pages/home/HtmlSourceTabs.tsx:109
+#: src/pages/home/HtmlSourceTabs.tsx:148
 msgid "URL"
 msgstr "URL"
 
-#: src/pages/Home.tsx:116
+#: src/pages/home/MetaHelpDialog.tsx:42
+msgid "Using Meta Tags for Configuration"
+msgstr "Using Meta Tags for Configuration"
+
+#: src/pages/home/Home.tsx:16
 msgid "Vector-perfect PDF rendering from HTML"
 msgstr "Vector-perfect PDF rendering from HTML"
+
+#: src/pages/home/AdvancedOptions.tsx:47
+msgid "Viewport Height (px)"
+msgstr "Viewport Height (px)"
+
+#: src/pages/home/AdvancedOptions.tsx:33
+msgid "Viewport Width (px)"
+msgstr "Viewport Width (px)"
+
+#: src/pages/home/AdvancedOptions.tsx:62
+msgid "Wait After Load (ms)"
+msgstr "Wait After Load (ms)"
+
+#: src/pages/home/MetaHelpDialog.tsx:46
+msgid "What are meta tag options?"
+msgstr "What are meta tag options?"
+
+#: src/pages/home/MetaHelpDialog.tsx:48
+msgid "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."
+msgstr "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."

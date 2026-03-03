@@ -34,7 +34,9 @@ export function Select({ label, value, onValueChange, options, placeholder }: Se
       {label && <span className={labelStyle}>{label}</span>}
       <RadixSelect.Root value={value} onValueChange={onValueChangeSafe}>
         <RadixSelect.Trigger className={trigger}>
-          <RadixSelect.Value placeholder={placeholder} />
+          <RadixSelect.Value placeholder={placeholder}>
+            {/* {safe(value) === EmptyValue && emptyLabel ? emptyLabel : undefined} */}
+          </RadixSelect.Value>
           <RadixSelect.Icon>▾</RadixSelect.Icon>
         </RadixSelect.Trigger>
         <RadixSelect.Portal>

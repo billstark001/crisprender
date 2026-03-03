@@ -1,5 +1,8 @@
 import { Hono } from 'hono';
-import { renderPdf } from '../services/renderer.js';
+import { FormatOptions, RenderOptions, renderPdf } from '../services/renderer.js';
+import { createLogger } from '../utils/logger.js';
+
+const log = createLogger('pdf');
 
 const pdfRoutes = new Hono();
 
@@ -11,7 +14,7 @@ pdfRoutes.post('/generate', async (c) => {
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  const { html, url, selector, scale, format, fitMode } = body;
+  const { html, url, selector, scale, format, fitMode, viewportWidth, viewportHeight, waitAfterLoad } = body;
 
   if (!html && !url) {
     return c.json({ error: 'Either html or url must be provided' }, 400);
@@ -35,16 +38,22 @@ pdfRoutes.post('/generate', async (c) => {
   if (typeof fitMode !== 'undefined' && fitMode !== 'contain' && fitMode !== 'none') {
     return c.json({ error: 'fitMode must be "contain" or "none"' }, 400);
   }
+  if (typeof viewportWidth !== 'undefined' && typeof viewportWidth !== 'number') {
+    return c.json({ error: 'viewportWidth must be a number' }, 400);
+  }
+  if (typeof viewportHeight !== 'undefined' && typeof viewportHeight !== 'number') {
+    return c.json({ error: 'viewportHeight must be a number' }, 400);
+  }
+  if (typeof waitAfterLoad !== 'undefined' && typeof waitAfterLoad !== 'number') {
+    return c.json({ error: 'waitAfterLoad must be a number' }, 400);
+  }
 
   try {
-    const pdfBuffer = await renderPdf({
-      html: html as string | undefined,
-      url: url as string | undefined,
-      selector: selector as string | undefined,
-      scale: scale as number | undefined,
-      format: format as string | undefined,
-      fitMode: fitMode as 'contain' | 'none' | undefined,
-    });
+    const options = Object.fromEntries(
+      Object.entries({ html, url, selector, scale, format, fitMode, viewportWidth, viewportHeight, waitAfterLoad })
+        .filter(([, value]) => value !== undefined),
+    );
+    const pdfBuffer = await renderPdf(options as RenderOptions);
 
     return new Response(pdfBuffer.buffer as ArrayBuffer, {
       status: 200,
@@ -56,6 +65,7 @@ pdfRoutes.post('/generate', async (c) => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Rendering failed';
+    log.error({ err }, 'PDF generation failed: %s', message);
     return c.json({ error: message }, 500);
   }
 });

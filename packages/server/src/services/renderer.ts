@@ -1,13 +1,121 @@
 import { browserService } from './browser.js';
 import { paperSizes } from '../utils/paperSizes.js';
+import { createLogger } from '../utils/logger.js';
+
+const log = createLogger('renderer');
+import { PaperFormat } from 'puppeteer';
+import { toKebab, toSnake, toPascal } from '../utils/string.js';
+
+export type FormatOptions = PaperFormat | 'None' | 'none';
 
 export interface RenderOptions {
   html?: string;
   url?: string;
   selector?: string;
   scale?: number;
-  format?: string;
+  format?: FormatOptions;
   fitMode?: 'contain' | 'none';
+  /** Headless browser viewport width in pixels (default: 1280). */
+  viewportWidth?: number;
+  /** Headless browser viewport height in pixels (default: 900). */
+  viewportHeight?: number;
+  /** Extra milliseconds to wait after page load before measuring / rendering (default: 0). */
+  waitAfterLoad?: number;
+}
+
+/**
+ * Generate all meta-tag `name` candidates for a camelCase option name.
+ *
+ * For each case style (kebab → snake → camelCase → PascalCase) the function
+ * tries every recognised prefix in order: `crisprender`, `crisp-render`, `cr`,
+ * and no-prefix — giving 16 candidates per option (with duplicates removed).
+ *
+ * Example — `fitMode` produces (among others):
+ *   `crisprender-fit-mode`, `crisp-render-fit-mode`, `cr-fit-mode`, `fit-mode`,
+ *   `crisprender-fit_mode`, …, `crisprender-FitMode`, …, `FitMode`
+ */
+export function metaNameCandidates(camelName: string): string[] {
+  const kebab = toKebab(camelName);
+  const snake = toSnake(camelName);
+  const pascal = toPascal(camelName);
+  const prefixes = ['crisprender', 'crisp-render', 'cr', ''] as const;
+  const caseVariants = [kebab, snake, camelName, pascal];
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const variant of caseVariants) {
+    for (const prefix of prefixes) {
+      const candidate = prefix ? `${prefix}-${variant}` : variant;
+      if (!seen.has(candidate)) {
+        seen.add(candidate);
+        result.push(candidate);
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Pre-computed meta-tag name candidates for every configurable RenderOption
+ * (excluding `html` and `url` which are inputs, not rendering settings).
+ */
+const OPTION_CANDIDATES = {
+  selector: [
+    // Legacy name kept for backwards compatibility
+    'pdf-target-selector',
+    ...metaNameCandidates('selector'),
+  ],
+  scale: metaNameCandidates('scale'),
+  format: metaNameCandidates('format'),
+  fitMode: metaNameCandidates('fitMode'),
+  viewportWidth: metaNameCandidates('viewportWidth'),
+  viewportHeight: metaNameCandidates('viewportHeight'),
+  waitAfterLoad: metaNameCandidates('waitAfterLoad'),
+} as const satisfies Partial<Record<keyof RenderOptions, readonly string[]>>;
+
+/**
+ * Read render-option defaults embedded in the page's `<meta>` tags.
+ *
+ * All values found here are **overridden** by any explicit option passed by
+ * the caller.  The search order for each option follows the candidate list
+ * produced by {@link metaNameCandidates}: kebab → snake → camelCase →
+ * PascalCase, each with prefixes `crisprender` → `crisp-render` → `cr` → ∅.
+ *
+ * @param page - A Puppeteer `Page` that has already loaded its content.
+ * @returns A partial `RenderOptions` with typed values (strings coerced).
+ */
+export async function extractMetaOptions(
+  page: import('puppeteer').Page,
+): Promise<Partial<RenderOptions>> {
+  // Serialise the candidates map so it can be transferred into the browser ctx.
+  const candidatesMap = OPTION_CANDIDATES as Record<string, readonly string[]>;
+
+  const raw = await page.evaluate((candidates: Record<string, string[]>) => {
+    const result: Record<string, string> = {};
+    for (const [key, names] of Object.entries(candidates)) {
+      for (const name of names) {
+        const el = document.querySelector(`meta[name="${name}"]`);
+        if (el) {
+          const val = el.getAttribute('content');
+          if (val !== null) {
+            result[key] = val;
+            break;
+          }
+        }
+      }
+    }
+    return result;
+  }, candidatesMap as Record<string, string[]>);
+
+  // Coerce raw string values to their proper types.
+  const opts: Partial<RenderOptions> = {};
+  if (raw.selector) opts.selector = raw.selector;
+  if (raw.scale !== undefined) { const n = parseFloat(raw.scale); if (!isNaN(n)) opts.scale = n; }
+  if (raw.format) opts.format = raw.format as FormatOptions;
+  if (raw.fitMode === 'contain' || raw.fitMode === 'none') opts.fitMode = raw.fitMode;
+  if (raw.viewportWidth !== undefined) { const n = parseInt(raw.viewportWidth, 10); if (!isNaN(n) && n > 0) opts.viewportWidth = n; }
+  if (raw.viewportHeight !== undefined) { const n = parseInt(raw.viewportHeight, 10); if (!isNaN(n) && n > 0) opts.viewportHeight = n; }
+  if (raw.waitAfterLoad !== undefined) { const n = parseInt(raw.waitAfterLoad, 10); if (!isNaN(n) && n >= 0) opts.waitAfterLoad = n; }
+  return opts;
 }
 
 interface BoundingBox {
@@ -44,7 +152,13 @@ function assertSafeUrl(url: string): void {
 }
 
 export async function renderPdf(options: RenderOptions): Promise<Buffer> {
-  const { html, url, selector, scale = 1, format, fitMode = 'contain' } = options;
+  const {
+    html,
+    url,
+    // Viewport / timing must be known before page load; apply defaults here.
+    viewportWidth = 1280,
+    viewportHeight = 900,
+  } = options;
 
   // Validate HTML size
   if (html && Buffer.byteLength(html, 'utf8') > MAX_HTML_BYTES) {
@@ -55,6 +169,9 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
   if (url) {
     assertSafeUrl(url);
   }
+
+  const renderStart = Date.now();
+  log.info({ mode: html ? 'html' : 'url', url: url ?? undefined }, 'Render started');
 
   const page = await browserService.getPage();
   let released = false;
@@ -69,6 +186,7 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
   const timeout = setTimeout(() => { void releasePage(); }, 15000);
 
   try {
+    await page.setViewport({ width: viewportWidth, height: viewportHeight });
     await page.emulateMediaType('screen');
 
     if (html) {
@@ -79,14 +197,37 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       throw new Error('Either html or url must be provided');
     }
 
-    // Resolve target selector
+    // Read rendering defaults from the page's <meta> tags.
+    // Explicit API options take precedence over meta-tag values.
+    const metaOpts = await extractMetaOptions(page);
+    const {
+      selector,
+      scale = 1,
+      format,
+      fitMode = 'contain',
+      waitAfterLoad = 0,
+    } = { ...metaOpts, ...options };
+
+    // If the page embedded different viewport dimensions, re-apply and allow
+    // the browser to reflow before we measure.
+    const resolvedVW = options.viewportWidth ?? metaOpts.viewportWidth ?? 1280;
+    const resolvedVH = options.viewportHeight ?? metaOpts.viewportHeight ?? 900;
+    if (resolvedVW !== viewportWidth || resolvedVH !== viewportHeight) {
+      await page.setViewport({ width: resolvedVW, height: resolvedVH });
+    }
+
+    // Optional extra delay for JS-driven animations (e.g. D3 force simulations)
+    if (waitAfterLoad > 0) {
+      log.info({ waitAfterLoad }, 'Waiting extra time after load');
+      await new Promise((resolve) => setTimeout(resolve, waitAfterLoad));
+    }
+
+    // Resolve target selector.
+    // Priority: (1) explicit API option or meta-tag value (already in `selector`),
+    //           (2) [data-pdf-target="true"] element as a convenience fallback,
+    //           (3) <body>.
     const targetSelector = await page.evaluate((explicitSelector) => {
       if (explicitSelector) return explicitSelector;
-      const meta = document.querySelector('meta[name="pdf-target-selector"]');
-      if (meta) {
-        const content = meta.getAttribute('content');
-        if (content) return content;
-      }
       const dataTarget = document.querySelector('[data-pdf-target="true"]');
       if (dataTarget) {
         // Build a unique selector for this element
@@ -109,7 +250,7 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       throw new Error(`Element not found or has zero dimensions: ${targetSelector}`);
     }
 
-    if (!format) {
+    if (!format || format.toLowerCase() === 'none') {
       // Illustration mode: crop to element
       const pdfWidth = bbox.width * scale;
       const pdfHeight = bbox.height * scale;
@@ -124,10 +265,11 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
         printBackground: true,
       });
 
+      log.info({ format: 'none', durationMs: Date.now() - renderStart }, 'Render completed (crop mode)');
       return Buffer.from(pdfBuffer);
     } else {
       // Poster mode: fit element onto paper format
-      const paper = paperSizes[format];
+      const paper = paperSizes[format as PaperFormat];
       if (!paper) {
         throw new Error(`Unknown paper format: ${format}`);
       }
@@ -147,10 +289,11 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       await page.addStyleTag({ content: cssTransform });
 
       const pdfBuffer = await page.pdf({
-        format: format as 'A4' | 'A3' | 'A2' | 'A1' | 'A0' | 'Letter' | 'Legal',
+        format: format as PaperFormat,
         printBackground: true,
       });
 
+      log.info({ format, durationMs: Date.now() - renderStart }, 'Render completed (poster mode)');
       return Buffer.from(pdfBuffer);
     }
   } finally {

@@ -1,6 +1,6 @@
 import { I18nProvider } from '@lingui/react';
 import { i18n } from './i18n.js';
-import { Home } from './pages/Home.js';
+import { Home } from './pages/home/Home.js';
 
 export default function App() {
   return (

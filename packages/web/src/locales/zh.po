@@ -12,96 +12,249 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/pages/Home.tsx:134
+#: src/pages/home/RenderForm.tsx:66
+msgid "(default)"
+msgstr "（默认）"
+
+#: src/pages/home/RenderForm.tsx:65
+msgid "(meta)"
+msgstr "（元数据）"
+
+#: src/pages/home/RenderForm.tsx:211
 msgid "#main or .content"
 msgstr "#main 或 .content"
 
-#: src/components/HtmlSourceTabs.tsx:141
+#: src/pages/home/AdvancedOptions.tsx:69
+msgid "0 (default)"
+msgstr "0（默认）"
+
+#: src/pages/home/RenderForm.tsx:226
+#~ msgid "1 (default)"
+#~ msgstr "1（默认）"
+
+#: src/pages/home/AdvancedOptions.tsx:40
+msgid "1280 (default)"
+msgstr "1280（默认）"
+
+#: src/pages/home/AdvancedOptions.tsx:54
+msgid "900 (default)"
+msgstr "900（默认）"
+
+#: src/pages/home/HtmlSourceTabs.tsx:141
 msgid "Accepts .html, .htm"
 msgstr "接受 .html, .htm"
 
-#: src/pages/Home.tsx:90
+#: src/pages/home/RenderForm.tsx:183
 msgid "An error occurred. Please try again."
 msgstr "发生错误，请重试。"
 
-#: src/components/HtmlSourceTabs.tsx:139
+#: src/pages/home/MetaHelpDialog.tsx:54
+msgid "Available options"
+msgstr "可用选项"
+
+#: src/pages/home/HtmlSourceTabs.tsx:139
 msgid "Click or drag an HTML file here"
 msgstr "点击此处上传，或拖拽 HTML 文件到此处"
 
-#~ msgid "Contain"
-#~ msgstr "包含"
+#: src/pages/home/RenderForm.tsx:48
+msgid "Contain"
+msgstr "包含"
 
-#: src/pages/Home.tsx:115
+#: src/pages/Home.tsx:296
+#~ msgid "contain (default)"
+#~ msgstr "包含（默认）"
+
+#: src/pages/home/MetaTagPanel.tsx:60
+msgid "Copied!"
+msgstr "已复制！"
+
+#: src/pages/home/MetaTagPanel.tsx:60
+msgid "Copy meta tags"
+msgstr "复制Meta标签"
+
+#: src/pages/home/Home.tsx:15
 msgid "CrispRender"
 msgstr "CrispRender"
 
-#: src/pages/Home.tsx:133
+#: src/pages/home/RenderForm.tsx:207
 msgid "CSS Selector"
 msgstr "CSS选择器"
 
-#: src/pages/Home.tsx:179
+#: src/pages/home/MetaHelpDialog.tsx:60
+#: src/pages/home/RenderForm.tsx:42
+#: src/pages/home/RenderForm.tsx:47
+msgid "Default"
+msgstr "默认"
+
+#: src/pages/home/RenderForm.tsx:63
+#~ msgid "Default - Contain"
+#~ msgstr "默认 - 包含"
+
+#: src/pages/home/RenderForm.tsx:50
+#~ msgid "Default - None (Illustration)"
+#~ msgstr "默认 - 无（插图模式）"
+
+#: src/pages/home/RenderForm.tsx:31
 msgid "Download PDF"
 msgstr "下载PDF"
 
-#: src/components/HtmlSourceTabs.tsx:106
+#: src/pages/home/MetaHelpDialog.tsx:117
+msgid "Example"
+msgstr "示例"
+
+#: src/pages/home/HtmlSourceTabs.tsx:106
 msgid "File"
 msgstr "文件"
 
-#: src/pages/Home.tsx:160
+#: src/pages/home/RenderForm.tsx:247
 msgid "Fit Mode"
 msgstr "适应模式"
 
-#: src/pages/Home.tsx:167
+#: src/pages/home/MetaHelpDialog.tsx:93
+msgid "fitMode example"
+msgstr "fitMode 示例"
+
+#: src/pages/home/MetaHelpDialog.tsx:87
+msgid "For each option CrispRender tries every combination of 4 case styles × 4 prefixes (first match wins)."
+msgstr "对于每个选项，CrispRender 会尝试 4 种大小写风格 × 4 种前缀的所有组合（第一个匹配优先）。"
+
+#: src/pages/home/MetaTagPanel.tsx:58
+msgid "Form values override meta tags"
+msgstr "表单值将覆盖Meta标签中的设置"
+
+#: src/pages/home/RenderForm.tsx:267
 msgid "Generate PDF"
 msgstr "生成PDF"
 
-#: src/pages/Home.tsx:167
+#: src/pages/home/RenderForm.tsx:267
 msgid "Generating..."
 msgstr "生成中..."
 
-#: src/components/HtmlSourceTabs.tsx:103
+#: src/pages/home/AdvancedOptions.tsx:26
+msgid "Hide advanced options ▲"
+msgstr "收起高级选项 ▲"
+
+#: src/pages/home/HtmlSourceTabs.tsx:103
 msgid "HTML"
 msgstr "HTML"
 
-#: src/components/HtmlSourceTabs.tsx:116
+#: src/pages/home/HtmlSourceTabs.tsx:116
 msgid "HTML Content"
 msgstr "HTML内容"
 
-#: src/components/HtmlSourceTabs.tsx:149
+#: src/pages/home/HtmlSourceTabs.tsx:149
 msgid "https://example.com"
 msgstr "https://example.com"
 
 #~ msgid "Language"
 #~ msgstr "语言"
 
-#~ msgid "None"
-#~ msgstr "无"
+#: src/pages/home/MetaTagPanel.tsx:26
+#: src/pages/home/MetaTagPanel.tsx:27
+msgid "Learn how to use meta tags"
+msgstr "了解如何使用Meta标签"
 
-#: src/pages/Home.tsx:155
+#: src/pages/home/MetaTagPanel.tsx:21
+msgid "Meta tag options"
+msgstr "元数据标签选项"
+
+#: src/components/MetaHelpDialog.tsx:39
+#~ msgid "Meta Tag Options"
+#~ msgstr "元数据标签选项"
+
+#: src/pages/Home.tsx:157
+#~ msgid "Meta tags detected in HTML"
+#~ msgstr "检测到HTML中的Meta标签"
+
+#: src/pages/home/MetaHelpDialog.tsx:85
+msgid "Naming convention"
+msgstr "命名规则"
+
+#: src/pages/home/MetaTagPanel.tsx:55
+msgid "No meta tags detected in this HTML"
+msgstr "此HTML中未检测到Meta标签"
+
+#: src/pages/home/RenderForm.tsx:49
+msgid "None"
+msgstr "无"
+
+#: src/pages/home/RenderForm.tsx:43
 msgid "None (Illustration)"
 msgstr "无（插图模式）"
 
-#: src/pages/Home.tsx:151
+#: src/pages/Home.tsx:283
+#~ msgid "None (Illustration) — default"
+#~ msgstr "无（插图模式） - 默认"
+
+#: src/pages/home/MetaHelpDialog.tsx:58
+msgid "Option"
+msgstr "选项"
+
+#: src/pages/home/RenderForm.tsx:234
 msgid "Paper Format"
 msgstr "纸张格式"
 
-#: src/components/HtmlSourceTabs.tsx:117
+#: src/pages/home/HtmlSourceTabs.tsx:117
 msgid "Paste your HTML here..."
 msgstr "在此粘贴HTML..."
 
-#: src/pages/Home.tsx:187
+#: src/pages/home/Home.tsx:25
 msgid "Powered by Chromium & Hono"
 msgstr "由 Chromium 和 Hono 驱动"
 
-#: src/pages/Home.tsx:142
+#: src/pages/home/MetaHelpDialog.tsx:111
+msgid "Prefixes in order: crisprender · crisp-render · cr · (none)"
+msgstr "前缀顺序：crisprender · crisp-render · cr · （无）"
+
+#: src/pages/home/RenderForm.tsx:220
 msgid "Scale"
 msgstr "缩放比例"
 
-#: src/components/HtmlSourceTabs.tsx:109
-#: src/components/HtmlSourceTabs.tsx:148
+#: src/pages/home/AdvancedOptions.tsx:26
+msgid "Show advanced options ▼"
+msgstr "显示高级选项 ▼"
+
+#: src/pages/home/MetaHelpDialog.tsx:92
+msgid "Style"
+msgstr "样式"
+
+#: src/pages/home/MetaHelpDialog.tsx:120
+msgid "The legacy name \"pdf-target-selector\" is also accepted as an alias for \"selector\"."
+msgstr "旧名称 \"pdf-target-selector\" 也被接受为 \"selector\" 的别名。"
+
+#: src/pages/home/MetaHelpDialog.tsx:59
+msgid "Type"
+msgstr "类型"
+
+#: src/pages/home/HtmlSourceTabs.tsx:109
+#: src/pages/home/HtmlSourceTabs.tsx:148
 msgid "URL"
 msgstr "网址"
 
-#: src/pages/Home.tsx:116
+#: src/pages/home/MetaHelpDialog.tsx:42
+msgid "Using Meta Tags for Configuration"
+msgstr "使用Meta标签进行配置"
+
+#: src/pages/home/Home.tsx:16
 msgid "Vector-perfect PDF rendering from HTML"
 msgstr "从HTML生成矢量完美的PDF"
+
+#: src/pages/home/AdvancedOptions.tsx:47
+msgid "Viewport Height (px)"
+msgstr "视口高度（像素）"
+
+#: src/pages/home/AdvancedOptions.tsx:33
+msgid "Viewport Width (px)"
+msgstr "视口宽度（像素）"
+
+#: src/pages/home/AdvancedOptions.tsx:62
+msgid "Wait After Load (ms)"
+msgstr "加载后等待时间（毫秒）"
+
+#: src/pages/home/MetaHelpDialog.tsx:46
+msgid "What are meta tag options?"
+msgstr "什么是Meta标签选项？"
+
+#: src/pages/home/MetaHelpDialog.tsx:48
+msgid "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."
+msgstr "您可以使用 <meta> 标签将 CrispRender 渲染设置直接嵌入 HTML 文档中。这些值作为默认值，可被表单中设置的任何选项覆盖。"
