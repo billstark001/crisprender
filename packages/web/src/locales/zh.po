@@ -4,63 +4,104 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "MIME-Version: 1.0\n"
 "Language: zh\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
-msgid "CrispRender"
-msgstr "CrispRender"
-
-msgid "Vector-perfect PDF rendering from HTML"
-msgstr "从HTML生成矢量完美的PDF"
-
-msgid "HTML Content"
-msgstr "HTML内容"
-
-msgid "Paste your HTML here..."
-msgstr "在此粘贴HTML..."
-
-msgid "URL"
-msgstr "网址"
-
-msgid "https://example.com"
-msgstr "https://example.com"
-
-msgid "CSS Selector"
-msgstr "CSS选择器"
-
+#: src/pages/Home.tsx:134
 msgid "#main or .content"
 msgstr "#main 或 .content"
 
-msgid "Scale"
-msgstr "缩放比例"
+#: src/components/HtmlSourceTabs.tsx:141
+msgid "Accepts .html, .htm"
+msgstr "接受 .html, .htm"
 
-msgid "Paper Format"
-msgstr "纸张格式"
+#: src/pages/Home.tsx:90
+msgid "An error occurred. Please try again."
+msgstr "发生错误，请重试。"
 
-msgid "None (Illustration)"
-msgstr "无（插图模式）"
+#: src/components/HtmlSourceTabs.tsx:139
+msgid "Click or drag an HTML file here"
+msgstr "点击此处上传，或拖拽 HTML 文件到此处"
 
-msgid "Fit Mode"
-msgstr "适应模式"
+#~ msgid "Contain"
+#~ msgstr "包含"
 
-msgid "Contain"
-msgstr "包含"
+#: src/pages/Home.tsx:115
+msgid "CrispRender"
+msgstr "CrispRender"
 
-msgid "None"
-msgstr "无"
+#: src/pages/Home.tsx:133
+msgid "CSS Selector"
+msgstr "CSS选择器"
 
-msgid "Generate PDF"
-msgstr "生成PDF"
-
-msgid "Generating..."
-msgstr "生成中..."
-
+#: src/pages/Home.tsx:179
 msgid "Download PDF"
 msgstr "下载PDF"
 
-msgid "Language"
-msgstr "语言"
+#: src/components/HtmlSourceTabs.tsx:106
+msgid "File"
+msgstr "文件"
 
+#: src/pages/Home.tsx:160
+msgid "Fit Mode"
+msgstr "适应模式"
+
+#: src/pages/Home.tsx:167
+msgid "Generate PDF"
+msgstr "生成PDF"
+
+#: src/pages/Home.tsx:167
+msgid "Generating..."
+msgstr "生成中..."
+
+#: src/components/HtmlSourceTabs.tsx:103
+msgid "HTML"
+msgstr "HTML"
+
+#: src/components/HtmlSourceTabs.tsx:116
+msgid "HTML Content"
+msgstr "HTML内容"
+
+#: src/components/HtmlSourceTabs.tsx:149
+msgid "https://example.com"
+msgstr "https://example.com"
+
+#~ msgid "Language"
+#~ msgstr "语言"
+
+#~ msgid "None"
+#~ msgstr "无"
+
+#: src/pages/Home.tsx:155
+msgid "None (Illustration)"
+msgstr "无（插图模式）"
+
+#: src/pages/Home.tsx:151
+msgid "Paper Format"
+msgstr "纸张格式"
+
+#: src/components/HtmlSourceTabs.tsx:117
+msgid "Paste your HTML here..."
+msgstr "在此粘贴HTML..."
+
+#: src/pages/Home.tsx:187
 msgid "Powered by Chromium & Hono"
 msgstr "由 Chromium 和 Hono 驱动"
 
-msgid "An error occurred. Please try again."
-msgstr "发生错误，请重试。"
+#: src/pages/Home.tsx:142
+msgid "Scale"
+msgstr "缩放比例"
+
+#: src/components/HtmlSourceTabs.tsx:109
+#: src/components/HtmlSourceTabs.tsx:148
+msgid "URL"
+msgstr "网址"
+
+#: src/pages/Home.tsx:116
+msgid "Vector-perfect PDF rendering from HTML"
+msgstr "从HTML生成矢量完美的PDF"
