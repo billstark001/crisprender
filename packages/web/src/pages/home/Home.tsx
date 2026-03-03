@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { loadCatalog, type Locale } from '@/i18n.js';
+import { useState, useEffect } from 'react';
+import { loadCatalog, detectLocale, type Locale } from '@/i18n.js';
 import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/core/macro';
 import { AppHeader } from './AppHeader.js';
@@ -28,7 +28,11 @@ export function AppFooter() {
 }
 
 export function Home() {
-  const [currentLocale, setCurrentLocale] = useState<Locale>('en');
+  const [currentLocale, setCurrentLocale] = useState<Locale>(() => detectLocale());
+
+  useEffect(() => {
+    loadCatalog(currentLocale);
+  }, []);
 
   const switchLocale = async (locale: Locale) => {
     await loadCatalog(locale);

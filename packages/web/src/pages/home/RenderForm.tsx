@@ -98,17 +98,17 @@ export function RenderForm() {
   const generateMetaTags = (): string => {
     const lines: string[] = [];
 
-    const sel = selector.trim() || detectedMeta.selector;
-    if (sel) lines.push(`<meta name="crisprender-selector" content="${sel}">`);
+    const sel = selector.trim() || detectedMeta.selector || 'body';
+    lines.push(`<meta name="crisprender-selector" content="${sel}">`);
 
     const scaleVal = scale.trim() || (detectedMeta.scale !== undefined ? String(detectedMeta.scale) : '1');
     lines.push(`<meta name="crisprender-scale" content="${scaleVal}">`);
 
-    const fmt = format || detectedMeta.format;
-    if (fmt) lines.push(`<meta name="crisprender-format" content="${fmt}">`);
+    const fmt = format || detectedMeta.format || 'None';
+    lines.push(`<meta name="crisprender-format" content="${fmt}">`);
 
-    const fm = fitMode || detectedMeta.fitMode;
-    if (fm) lines.push(`<meta name="crisprender-fit-mode" content="${fm}">`);
+    const fm = fitMode || detectedMeta.fitMode || 'contain';
+    lines.push(`<meta name="crisprender-fit-mode" content="${fm}">`);
 
     const vw = advancedValues.viewportWidth.trim() || (detectedMeta.viewportWidth !== undefined ? String(detectedMeta.viewportWidth) : '1280');
     lines.push(`<meta name="crisprender-viewport-width" content="${vw}">`);
@@ -207,8 +207,8 @@ export function RenderForm() {
                 label={i18n._(msg`CSS Selector`)}
                 placeholder={
                   detectedMeta.selector
-                    ? `${detectedMeta.selector} (meta)`
-                    : i18n._(msg`#main or .content`)
+                    ? `${detectedMeta.selector} ${metaPrefix}`
+                    : `body ${defaultPrefix}`
                 }
                 value={selector}
                 onChange={(e) => setSelector(e.target.value)}

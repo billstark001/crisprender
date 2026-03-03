@@ -41,7 +41,7 @@ export function AdvancedOptions({ show, onToggle, detectedMeta, values, onChange
               placeholder={
                 detectedMeta.viewportWidth !== undefined
                   ? `${detectedMeta.viewportWidth} ${metaPrefix}`
-                  : i18n._(msg`1280 ${defaultPrefix}`)
+                  : `1280 ${defaultPrefix}`
               }
               value={values.viewportWidth}
               onChange={(e) => onChange('viewportWidth', e.target.value)}
@@ -55,7 +55,7 @@ export function AdvancedOptions({ show, onToggle, detectedMeta, values, onChange
               placeholder={
                 detectedMeta.viewportHeight !== undefined
                   ? `${detectedMeta.viewportHeight} ${metaPrefix}`
-                  : i18n._(msg`900 ${defaultPrefix}`)
+                  : `900 ${defaultPrefix}`
               }
               value={values.viewportHeight}
               onChange={(e) => onChange('viewportHeight', e.target.value)}
@@ -70,7 +70,7 @@ export function AdvancedOptions({ show, onToggle, detectedMeta, values, onChange
             placeholder={
               detectedMeta.waitAfterLoad !== undefined
                 ? `${detectedMeta.waitAfterLoad} ${metaPrefix}`
-                : i18n._(msg`0 ${defaultPrefix}`)
+                : `0 ${defaultPrefix}`
             }
             value={values.waitAfterLoad}
             onChange={(e) => onChange('waitAfterLoad', e.target.value)}

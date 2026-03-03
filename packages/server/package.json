@@ -12,6 +12,7 @@
     "@hono/node-server": "^1.19.9",
     "hono": "^4.12.3",
     "hono-rate-limiter": "^0.5.3",
+    "pdf-lib": "^1.17.1",
     "pino": "^9.0.0",
     "pino-pretty": "^13.0.0",
     "puppeteer": "^24.37.5",
