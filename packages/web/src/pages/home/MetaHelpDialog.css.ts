@@ -55,3 +55,17 @@ export const noteText = style({
   color: vars.color.textMuted,
   fontStyle: 'italic',
 });
+
+export const copyPromptRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space['3'],
+  paddingTop: vars.space['2'],
+  borderTop: `1px solid ${vars.color.border}`,
+});
+
+export const copyPromptNote = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textMuted,
+  flex: 1,
+});
