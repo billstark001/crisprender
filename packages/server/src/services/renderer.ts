@@ -1,3 +1,4 @@
+import { PDFDocument } from 'pdf-lib';
 import { browserService } from './browser.js';
 import { paperSizes } from '../utils/paperSizes.js';
 import { createLogger } from '../utils/logger.js';
@@ -128,6 +129,11 @@ interface BoundingBox {
 /** Maximum HTML payload accepted (10 MB). */
 const MAX_HTML_BYTES = Number(process.env.MAX_HTML_BYTES ?? 10 * 1024 * 1024);
 
+/** CSS pixels to PDF points: at 96 dpi, 1 CSS pixel = 72/96 pt. */
+const PT_PER_PX = 72 / 96;
+/** Millimetres to PDF points: 1 mm = 72/25.4 pt. */
+const PT_PER_MM = 72 / 25.4;
+
 /**
  * Private/reserved IP ranges blocked to prevent SSRF attacks.
  * Covers: loopback, link-local (169.254/16), RFC-1918, CGNAT (100.64/10),
@@ -250,52 +256,79 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       throw new Error(`Element not found or has zero dimensions: ${targetSelector}`);
     }
 
+    // Print the full viewport as-is — no CSS injection.
+    const viewportPdfBuffer = await page.pdf({
+      width: `${resolvedVW}px`,
+      height: `${resolvedVH}px`,
+      printBackground: true,
+    });
+
+    // Post-process with pdf-lib to crop / scale the viewport PDF.
+    const srcDoc = await PDFDocument.load(viewportPdfBuffer);
+    const srcPage = srcDoc.getPages()[0];
+    const { height: srcH } = srcPage.getSize();
+
+    const newDoc = await PDFDocument.create();
+    const [embeddedPage] = await newDoc.embedPages([srcPage]);
+
+    // Bounding box of the target element in PDF point coordinates.
+    // PDF y=0 is at the bottom, so we flip the browser y axis.
+    const bboxPdfX = bbox.x * PT_PER_PX;
+    const bboxPdfY = srcH - (bbox.y + bbox.height) * PT_PER_PX;
+    const elemW = bbox.width * PT_PER_PX;
+    const elemH = bbox.height * PT_PER_PX;
+
     if (!format || format.toLowerCase() === 'none') {
-      // Illustration mode: crop to element
-      const pdfWidth = bbox.width * scale;
-      const pdfHeight = bbox.height * scale;
-
-      await page.addStyleTag({
-        content: `html { transform: translate(-${bbox.x}px, -${bbox.y}px); }`,
+      // Crop mode: output page sized to the element, scaled by `scale`.
+      const pageW = elemW * scale;
+      const pageH = elemH * scale;
+      const newPage = newDoc.addPage([pageW, pageH]);
+      newPage.drawPage(embeddedPage, {
+        x: -bboxPdfX * scale,
+        y: -bboxPdfY * scale,
+        xScale: scale,
+        yScale: scale,
       });
-
-      const pdfBuffer = await page.pdf({
-        width: `${pdfWidth}px`,
-        height: `${pdfHeight}px`,
-        printBackground: true,
-      });
-
       log.info({ format: 'none', durationMs: Date.now() - renderStart }, 'Render completed (crop mode)');
-      return Buffer.from(pdfBuffer);
     } else {
-      // Poster mode: fit element onto paper format
+      // Poster mode: place element onto the target paper size.
       const paper = paperSizes[format as PaperFormat];
       if (!paper) {
         throw new Error(`Unknown paper format: ${format}`);
       }
 
-      let cssTransform = '';
+      const paperW = paper.width * PT_PER_MM;
+      const paperH = paper.height * PT_PER_MM;
+      const newPage = newDoc.addPage([paperW, paperH]);
+
+      let drawScale: number;
+      let offsetX: number;
+      let offsetY: number;
+
       if (fitMode === 'contain') {
-        const scaleX = paper.width / (bbox.width * 0.2645833); // px to mm (1px = 0.2645833mm at 96dpi)
-        const scaleY = paper.height / (bbox.height * 0.2645833);
-        const fitScale = Math.min(scaleX, scaleY) * scale;
-        const translateX = (paper.width / 0.2645833 - bbox.width * fitScale) / 2 - bbox.x * fitScale;
-        const translateY = (paper.height / 0.2645833 - bbox.height * fitScale) / 2 - bbox.y * fitScale;
-        cssTransform = `html { transform-origin: 0 0; transform: translate(${translateX}px, ${translateY}px) scale(${fitScale}); }`;
+        const fitScaleX = paperW / elemW;
+        const fitScaleY = paperH / elemH;
+        drawScale = Math.min(fitScaleX, fitScaleY) * scale;
+        offsetX = (paperW - elemW * drawScale) / 2;
+        offsetY = (paperH - elemH * drawScale) / 2;
       } else {
-        cssTransform = `html { transform: translate(-${bbox.x}px, -${bbox.y}px); }`;
+        // Place element at the top-left of the paper page, scaled.
+        drawScale = scale;
+        offsetX = 0;
+        offsetY = paperH - elemH * scale;
       }
 
-      await page.addStyleTag({ content: cssTransform });
-
-      const pdfBuffer = await page.pdf({
-        format: format as PaperFormat,
-        printBackground: true,
+      newPage.drawPage(embeddedPage, {
+        x: offsetX - bboxPdfX * drawScale,
+        y: offsetY - bboxPdfY * drawScale,
+        xScale: drawScale,
+        yScale: drawScale,
       });
-
       log.info({ format, durationMs: Date.now() - renderStart }, 'Render completed (poster mode)');
-      return Buffer.from(pdfBuffer);
     }
+
+    const pdfBytes = await newDoc.save();
+    return Buffer.from(pdfBytes);
   } finally {
     clearTimeout(timeout);
     await releasePage();
