@@ -73,7 +73,7 @@ Or start both in parallel from the root:
 pnpm dev
 ```
 
-The frontend Vite dev server listens on **http://localhost:5173** and proxies `/api/*` requests to the backend at **http://localhost:3000**.
+The frontend Vite dev server listens on **<http://localhost:5173>** and proxies `/api/*` requests to the backend at **<http://localhost:3000>**.
 
 > **Note:** The backend starts Chromium on the first PDF request, not on server start. The first request may be slow (~2–5 s) while Chromium initialises.
 
@@ -107,6 +107,7 @@ pnpm build          # builds both web and server
 ```
 
 Output:
+
 - Frontend → `packages/web/dist/`
 - Backend → `packages/server/dist/`
 

@@ -6,7 +6,7 @@
 docker compose up -d
 ```
 
-The service will be available at http://localhost:3000.
+The service will be available at <http://localhost:3000>.
 
 ## Environment Variables
 

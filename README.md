@@ -8,7 +8,7 @@ A vector-perfect PDF rendering microservice that converts HTML and web pages int
 docker compose up -d
 ```
 
-Open http://localhost:3000 in your browser.
+Open <http://localhost:3000> in your browser.
 
 ## Quick Start (local, no Docker)
 

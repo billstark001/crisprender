@@ -17,6 +17,7 @@ MAX_CONCURRENT_PAGES=10
 ```
 
 Practical upper bound is constrained by available RAM:
+
 - Each Chromium page ≈ 50–150 MB under typical load
 - A host with 2 GB free RAM can safely support 10–15 concurrent pages
 

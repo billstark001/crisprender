@@ -27,7 +27,8 @@ app.use(
     keyGenerator: (c) => {
       const ip =
         c.req.header('x-forwarded-for')?.split(',')[0].trim() ??
-        c.req.header('x-real-ip');
+        c.req.header('x-real-ip') ??
+        process.env.RATE_LIMIT_FALLBACK_IP;
       if (!ip) {
         // Reject requests with no identifiable client IP
         throw new Error('Unable to determine client IP');

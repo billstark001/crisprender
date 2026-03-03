@@ -27,13 +27,32 @@ export const logo = style({
 
 export const main = style({
   flex: '1',
-  maxWidth: '800px',
+  maxWidth: '1200px',
   width: '100%',
   margin: '0 auto',
   padding: `${vars.space['8']} ${vars.space['4']}`,
   display: 'flex',
   flexDirection: 'column',
   gap: vars.space['6'],
+});
+
+// Responsive form layout: side-by-side on wide screens, stacked on narrow
+export const formLayout = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: vars.space['6'],
+  alignItems: 'start',
+  '@media': {
+    '(max-width: 800px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+});
+
+export const formSide = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space['4'],
 });
 
 export const hero = style({

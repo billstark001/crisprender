@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useLingui } from '@lingui/react';
-import { msg } from '@lingui/macro';
+import { msg } from '@lingui/core/macro';
 import { Button } from '../components/Button.js';
-import { Input, Textarea } from '../components/Input.js';
+import { Input } from '../components/Input.js';
 import { Select } from '../components/Select.js';
 import { Card } from '../components/Card.js';
+import { HtmlSourceTabs, type HtmlSourceValue } from '../components/HtmlSourceTabs.js';
 import {
   page, header, logo, main, hero, heroTitle, heroSubtitle,
-  form, row, divider, resultArea, errorText, successLink,
+  form, formLayout, formSide, row, resultArea, errorText, successLink,
   footer, adsenseArea, langSelector, langBtn, langBtnActive,
 } from './Home.css.js';
 import { loadCatalog, locales, type Locale } from '../i18n.js';
@@ -34,8 +35,7 @@ export function Home() {
   const { i18n } = useLingui();
   const [currentLocale, setCurrentLocale] = useState<Locale>('en');
 
-  const [htmlContent, setHtmlContent] = useState('');
-  const [url, setUrl] = useState('');
+  const [htmlSource, setHtmlSource] = useState<HtmlSourceValue>(null);
   const [selector, setSelector] = useState('');
   const [scale, setScale] = useState('1');
   const [format, setFormat] = useState('');
@@ -57,12 +57,15 @@ export function Home() {
 
     try {
       const body: Record<string, unknown> = {};
-      if (htmlContent.trim()) body.html = htmlContent;
-      else if (url.trim()) body.url = url;
-      else {
+      if (!htmlSource) {
         setError('Please provide HTML content or a URL.');
         setLoading(false);
         return;
+      }
+      if (htmlSource.type === 'html' || htmlSource.type === 'file') {
+        body.html = htmlSource.content;
+      } else {
+        body.url = htmlSource.url;
       }
       if (selector.trim()) body.selector = selector;
       body.scale = parseFloat(scale) || 1;
@@ -119,64 +122,52 @@ export function Home() {
 
         <Card>
           <form className={form} onSubmit={handleSubmit}>
-            <Textarea
-              id="html"
-              label={i18n._(msg`HTML Content`)}
-              placeholder={i18n._(msg`Paste your HTML here...`)}
-              value={htmlContent}
-              onChange={(e) => setHtmlContent(e.target.value)}
-              rows={8}
-            />
+            <div className={formLayout}>
+              {/* Left / top: HTML source selector */}
+              <HtmlSourceTabs onChange={setHtmlSource} />
 
-            <div className={divider}>or</div>
+              {/* Right / bottom: options and submit */}
+              <div className={formSide}>
+                <Input
+                  id="selector"
+                  label={i18n._(msg`CSS Selector`)}
+                  placeholder={i18n._(msg`#main or .content`)}
+                  value={selector}
+                  onChange={(e) => setSelector(e.target.value)}
+                />
 
-            <Input
-              id="url"
-              label={i18n._(msg`URL`)}
-              placeholder={i18n._(msg`https://example.com`)}
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
+                <div className={row}>
+                  <Input
+                    id="scale"
+                    label={i18n._(msg`Scale`)}
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    max="10"
+                    value={scale}
+                    onChange={(e) => setScale(e.target.value)}
+                  />
+                  <Select
+                    label={i18n._(msg`Paper Format`)}
+                    value={format}
+                    onValueChange={setFormat}
+                    options={FORMAT_OPTIONS}
+                    placeholder={i18n._(msg`None (Illustration)`)}
+                  />
+                </div>
 
-            <Input
-              id="selector"
-              label={i18n._(msg`CSS Selector`)}
-              placeholder={i18n._(msg`#main or .content`)}
-              value={selector}
-              onChange={(e) => setSelector(e.target.value)}
-            />
+                <Select
+                  label={i18n._(msg`Fit Mode`)}
+                  value={fitMode}
+                  onValueChange={setFitMode}
+                  options={FITMODE_OPTIONS}
+                />
 
-            <div className={row}>
-              <Input
-                id="scale"
-                label={i18n._(msg`Scale`)}
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="10"
-                value={scale}
-                onChange={(e) => setScale(e.target.value)}
-              />
-              <Select
-                label={i18n._(msg`Paper Format`)}
-                value={format}
-                onValueChange={setFormat}
-                options={FORMAT_OPTIONS}
-                placeholder={i18n._(msg`None (Illustration)`)}
-              />
+                <Button type="submit" size="lg" disabled={loading}>
+                  {loading ? i18n._(msg`Generating...`) : i18n._(msg`Generate PDF`)}
+                </Button>
+              </div>
             </div>
-
-            <Select
-              label={i18n._(msg`Fit Mode`)}
-              value={fitMode}
-              onValueChange={setFitMode}
-              options={FITMODE_OPTIONS}
-            />
-
-            <Button type="submit" size="lg" disabled={loading}>
-              {loading ? i18n._(msg`Generating...`) : i18n._(msg`Generate PDF`)}
-            </Button>
           </form>
         </Card>
 
