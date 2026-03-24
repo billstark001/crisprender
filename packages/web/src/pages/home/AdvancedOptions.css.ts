@@ -30,3 +30,12 @@ export const row = style({
     },
   },
 });
+
+export const checkboxRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space['2'],
+  cursor: 'pointer',
+  fontSize: vars.fontSize.sm,
+  userSelect: 'none',
+});

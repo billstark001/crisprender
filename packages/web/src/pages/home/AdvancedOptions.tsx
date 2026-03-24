@@ -2,12 +2,13 @@ import { useLingui } from '@lingui/react';
 import { msg } from '@lingui/core/macro';
 import { Input } from '@/components/Input.js';
 import { type MetaRenderOptions } from '@/utils/metaOptions.js';
-import { advancedToggle, advancedSection, row } from './AdvancedOptions.css.js';
+import { advancedToggle, advancedSection, row, checkboxRow } from './AdvancedOptions.css.js';
 
 interface AdvancedOptionsValues {
   viewportWidth: string;
   viewportHeight: string;
   waitAfterLoad: string;
+  pruneInvisible: string;
 }
 
 interface AdvancedOptionsProps {
@@ -75,6 +76,20 @@ export function AdvancedOptions({ show, onToggle, detectedMeta, values, onChange
             value={values.waitAfterLoad}
             onChange={(e) => onChange('waitAfterLoad', e.target.value)}
           />
+          <label className={checkboxRow}>
+            <input
+              type="checkbox"
+              id="pruneInvisible"
+              checked={values.pruneInvisible === 'true' || (values.pruneInvisible === '' && detectedMeta.pruneInvisible === true)}
+              onChange={(e) => onChange('pruneInvisible', e.target.checked ? 'true' : 'false')}
+            />
+            <span>
+              {i18n._(msg`Prune invisible content`)}
+              {detectedMeta.pruneInvisible !== undefined && values.pruneInvisible === '' && (
+                <span style={{ marginLeft: 4, opacity: 0.6 }}>{metaPrefix}</span>
+              )}
+            </span>
+          </label>
         </div>
       )}
     </>

@@ -1,4 +1,4 @@
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, type PDFEmbeddedPage } from 'pdf-lib';
 import { browserService } from './browser.js';
 import { paperSizes } from '../utils/paperSizes.js';
 import { createLogger } from '../utils/logger.js';
@@ -22,6 +22,18 @@ export interface RenderOptions {
   viewportHeight?: number;
   /** Extra milliseconds to wait after page load before measuring / rendering (default: 0). */
   waitAfterLoad?: number;
+  /**
+   * When true, scrolls the page to the target element and reduces the
+   * headless-browser viewport to the element's dimensions before capturing
+   * the intermediate PDF. This eliminates drawing commands for content that
+   * lies outside the element's bounding box, producing a smaller output
+   * file. Default: false.
+   *
+   * This is a best-effort optimisation. Pages that depend on fixed-position
+   * elements or viewport-sensitive layouts may render differently when this
+   * option is enabled.
+   */
+  pruneInvisible?: boolean;
 }
 
 /**
@@ -71,6 +83,7 @@ const OPTION_CANDIDATES = {
   viewportWidth: metaNameCandidates('viewportWidth'),
   viewportHeight: metaNameCandidates('viewportHeight'),
   waitAfterLoad: metaNameCandidates('waitAfterLoad'),
+  pruneInvisible: metaNameCandidates('pruneInvisible'),
 } as const satisfies Partial<Record<keyof RenderOptions, readonly string[]>>;
 
 /**
@@ -116,6 +129,7 @@ export async function extractMetaOptions(
   if (raw.viewportWidth !== undefined) { const n = parseInt(raw.viewportWidth, 10); if (!isNaN(n) && n > 0) opts.viewportWidth = n; }
   if (raw.viewportHeight !== undefined) { const n = parseInt(raw.viewportHeight, 10); if (!isNaN(n) && n > 0) opts.viewportHeight = n; }
   if (raw.waitAfterLoad !== undefined) { const n = parseInt(raw.waitAfterLoad, 10); if (!isNaN(n) && n >= 0) opts.waitAfterLoad = n; }
+  if (raw.pruneInvisible === 'true' || raw.pruneInvisible === '1') opts.pruneInvisible = true;
   return opts;
 }
 
@@ -125,6 +139,21 @@ interface BoundingBox {
   width: number;
   height: number;
 }
+
+/** Element bounding box expressed in PDF point coordinates. */
+interface BboxPts {
+  /** Left edge in PDF points (x=0 is the left edge of the page). */
+  x: number;
+  /** Bottom edge in PDF points (y=0 is the bottom edge of the page). */
+  y: number;
+  /** Width in PDF points. */
+  w: number;
+  /** Height in PDF points. */
+  h: number;
+}
+
+/** Brief pause (ms) after viewport resize to allow layout reflow before re-measuring. */
+const REFLOW_DELAY_MS = 50;
 
 /** Maximum HTML payload accepted (10 MB). */
 const MAX_HTML_BYTES = Number(process.env.MAX_HTML_BYTES ?? 10 * 1024 * 1024);
@@ -155,6 +184,78 @@ function assertSafeUrl(url: string): void {
   if (SSRF_BLOCK_RE.test(url)) {
     throw new Error('URL resolves to a private or loopback address');
   }
+}
+
+/**
+ * Add a crop-mode output page to `doc`.
+ *
+ * The page is sized to the target element scaled by `scale`, and the
+ * embedded source page is positioned so the element aligns with the
+ * output-page origin (bottom-left corner in PDF coordinates).
+ */
+function addCropPage(
+  doc: PDFDocument,
+  src: PDFEmbeddedPage,
+  bbox: BboxPts,
+  scale: number,
+): void {
+  const pageW = bbox.w * scale;
+  const pageH = bbox.h * scale;
+  const page = doc.addPage([pageW, pageH]);
+  page.drawPage(src, {
+    x: -bbox.x * scale,
+    y: -bbox.y * scale,
+    xScale: scale,
+    yScale: scale,
+  });
+}
+
+/**
+ * Add a poster-mode output page to `doc`.
+ *
+ * The element is placed on a standard paper sheet using the given `fitMode`.
+ * In `contain` mode the element is scaled uniformly to fill the paper while
+ * preserving its aspect ratio and centred. In `none` mode the element is
+ * placed at the top-left of the paper at the requested `scale`.
+ */
+function addPosterPage(
+  doc: PDFDocument,
+  src: PDFEmbeddedPage,
+  bbox: BboxPts,
+  scale: number,
+  format: PaperFormat,
+  fitMode: 'contain' | 'none',
+): void {
+  const paper = paperSizes[format];
+  if (!paper) throw new Error(`Unknown paper format: ${format}`);
+
+  const paperW = paper.width * PT_PER_MM;
+  const paperH = paper.height * PT_PER_MM;
+  const page = doc.addPage([paperW, paperH]);
+
+  let drawScale: number;
+  let offsetX: number;
+  let offsetY: number;
+
+  if (fitMode === 'contain') {
+    const fitScaleX = paperW / bbox.w;
+    const fitScaleY = paperH / bbox.h;
+    drawScale = Math.min(fitScaleX, fitScaleY) * scale;
+    offsetX = (paperW - bbox.w * drawScale) / 2;
+    offsetY = (paperH - bbox.h * drawScale) / 2;
+  } else {
+    // Place element at the top-left of the paper page, scaled.
+    drawScale = scale;
+    offsetX = 0;
+    offsetY = paperH - bbox.h * scale;
+  }
+
+  page.drawPage(src, {
+    x: offsetX - bbox.x * drawScale,
+    y: offsetY - bbox.y * drawScale,
+    xScale: drawScale,
+    yScale: drawScale,
+  });
 }
 
 export async function renderPdf(options: RenderOptions): Promise<Buffer> {
@@ -212,6 +313,7 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       format,
       fitMode = 'contain',
       waitAfterLoad = 0,
+      pruneInvisible = false,
     } = { ...metaOpts, ...options };
 
     // If the page embedded different viewport dimensions, re-apply and allow
@@ -244,8 +346,8 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       return 'body';
     }, selector ?? null);
 
-    // Measure bounding box
-    const bbox = await page.evaluate((sel) => {
+    // Measure bounding box in the current viewport.
+    let bbox = await page.evaluate((sel) => {
       const el = document.querySelector(sel);
       if (!el) return null;
       const rect = el.getBoundingClientRect();
@@ -256,14 +358,57 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       throw new Error(`Element not found or has zero dimensions: ${targetSelector}`);
     }
 
-    // Print the full viewport as-is — no CSS injection.
+    // --- pruneInvisible optimisation ---
+    // Scroll the page so the target element sits at the top-left corner of
+    // the viewport, then shrink the viewport to the element's dimensions.
+    // This limits what Puppeteer renders in the intermediate PDF to just
+    // the element's area, significantly reducing the output file size.
+    let pdfWidth = resolvedVW;
+    let pdfHeight = resolvedVH;
+
+    if (pruneInvisible) {
+      const elemW = Math.ceil(bbox.width);
+      const elemH = Math.ceil(bbox.height);
+
+      // Scroll so the element is at the top-left of the viewport.
+      await page.evaluate(
+        (x: number, y: number) => { window.scrollTo(x, y); },
+        Math.floor(bbox.x),
+        Math.floor(bbox.y),
+      );
+
+      // Shrink the viewport to the element's bounding-box size.
+      await page.setViewport({ width: elemW, height: elemH });
+
+      // Allow a brief reflow before re-measuring.
+      await new Promise<void>((resolve) => setTimeout(resolve, REFLOW_DELAY_MS));
+
+      // Re-measure the element relative to the updated viewport.
+      const scrolledBbox = await page.evaluate((sel: string) => {
+        const el = document.querySelector(sel);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, width: r.width, height: r.height };
+      }, targetSelector) as BoundingBox | null;
+
+      if (scrolledBbox && scrolledBbox.width > 0 && scrolledBbox.height > 0) {
+        bbox = scrolledBbox;
+        // PDF dimensions must cover the element's extent in the new viewport.
+        pdfWidth = Math.ceil(Math.max(elemW, scrolledBbox.x + scrolledBbox.width));
+        pdfHeight = Math.ceil(Math.max(elemH, scrolledBbox.y + scrolledBbox.height));
+      }
+
+      log.info({ elemW, elemH, pdfWidth, pdfHeight }, 'pruneInvisible: viewport reduced to element size');
+    }
+
+    // Capture the (possibly reduced) viewport as a PDF.
     const viewportPdfBuffer = await page.pdf({
-      width: `${resolvedVW}px`,
-      height: `${resolvedVH}px`,
+      width: `${pdfWidth}px`,
+      height: `${pdfHeight}px`,
       printBackground: true,
     });
 
-    // Post-process with pdf-lib to crop / scale the viewport PDF.
+    // Post-process with pdf-lib to crop / place the captured PDF.
     const srcDoc = await PDFDocument.load(viewportPdfBuffer);
     const srcPage = srcDoc.getPages()[0];
     const { height: srcH } = srcPage.getSize();
@@ -271,59 +416,20 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
     const newDoc = await PDFDocument.create();
     const [embeddedPage] = await newDoc.embedPages([srcPage]);
 
-    // Bounding box of the target element in PDF point coordinates.
-    // PDF y=0 is at the bottom, so we flip the browser y axis.
-    const bboxPdfX = bbox.x * PT_PER_PX;
-    const bboxPdfY = srcH - (bbox.y + bbox.height) * PT_PER_PX;
-    const elemW = bbox.width * PT_PER_PX;
-    const elemH = bbox.height * PT_PER_PX;
+    // Convert the element's browser bounding box to PDF point coordinates.
+    // PDF y=0 is at the bottom of the page, so we flip the browser y-axis.
+    const bboxPts: BboxPts = {
+      x: bbox.x * PT_PER_PX,
+      y: srcH - (bbox.y + bbox.height) * PT_PER_PX,
+      w: bbox.width * PT_PER_PX,
+      h: bbox.height * PT_PER_PX,
+    };
 
     if (!format || format.toLowerCase() === 'none') {
-      // Crop mode: output page sized to the element, scaled by `scale`.
-      const pageW = elemW * scale;
-      const pageH = elemH * scale;
-      const newPage = newDoc.addPage([pageW, pageH]);
-      newPage.drawPage(embeddedPage, {
-        x: -bboxPdfX * scale,
-        y: -bboxPdfY * scale,
-        xScale: scale,
-        yScale: scale,
-      });
+      addCropPage(newDoc, embeddedPage, bboxPts, scale);
       log.info({ format: 'none', durationMs: Date.now() - renderStart }, 'Render completed (crop mode)');
     } else {
-      // Poster mode: place element onto the target paper size.
-      const paper = paperSizes[format as PaperFormat];
-      if (!paper) {
-        throw new Error(`Unknown paper format: ${format}`);
-      }
-
-      const paperW = paper.width * PT_PER_MM;
-      const paperH = paper.height * PT_PER_MM;
-      const newPage = newDoc.addPage([paperW, paperH]);
-
-      let drawScale: number;
-      let offsetX: number;
-      let offsetY: number;
-
-      if (fitMode === 'contain') {
-        const fitScaleX = paperW / elemW;
-        const fitScaleY = paperH / elemH;
-        drawScale = Math.min(fitScaleX, fitScaleY) * scale;
-        offsetX = (paperW - elemW * drawScale) / 2;
-        offsetY = (paperH - elemH * drawScale) / 2;
-      } else {
-        // Place element at the top-left of the paper page, scaled.
-        drawScale = scale;
-        offsetX = 0;
-        offsetY = paperH - elemH * scale;
-      }
-
-      newPage.drawPage(embeddedPage, {
-        x: offsetX - bboxPdfX * drawScale,
-        y: offsetY - bboxPdfY * drawScale,
-        xScale: drawScale,
-        yScale: drawScale,
-      });
+      addPosterPage(newDoc, embeddedPage, bboxPts, scale, format as PaperFormat, fitMode);
       log.info({ format, durationMs: Date.now() - renderStart }, 'Render completed (poster mode)');
     }
 

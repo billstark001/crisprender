@@ -14,7 +14,7 @@ pdfRoutes.post('/generate', async (c) => {
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  const { html, url, selector, scale, format, fitMode, viewportWidth, viewportHeight, waitAfterLoad } = body;
+  const { html, url, selector, scale, format, fitMode, viewportWidth, viewportHeight, waitAfterLoad, pruneInvisible } = body;
 
   if (!html && !url) {
     return c.json({ error: 'Either html or url must be provided' }, 400);
@@ -47,10 +47,13 @@ pdfRoutes.post('/generate', async (c) => {
   if (typeof waitAfterLoad !== 'undefined' && typeof waitAfterLoad !== 'number') {
     return c.json({ error: 'waitAfterLoad must be a number' }, 400);
   }
+  if (typeof pruneInvisible !== 'undefined' && typeof pruneInvisible !== 'boolean') {
+    return c.json({ error: 'pruneInvisible must be a boolean' }, 400);
+  }
 
   try {
     const options = Object.fromEntries(
-      Object.entries({ html, url, selector, scale, format, fitMode, viewportWidth, viewportHeight, waitAfterLoad })
+      Object.entries({ html, url, selector, scale, format, fitMode, viewportWidth, viewportHeight, waitAfterLoad, pruneInvisible })
         .filter(([, value]) => value !== undefined),
     );
     const pdfBuffer = await renderPdf(options as RenderOptions);

@@ -15,6 +15,7 @@ export type MetaRenderOptions = {
   viewportWidth?: number;
   viewportHeight?: number;
   waitAfterLoad?: number;
+  pruneInvisible?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -63,6 +64,7 @@ export const OPTION_CANDIDATES: Record<keyof MetaRenderOptions, string[]> = {
   viewportWidth: metaNameCandidates('viewportWidth'),
   viewportHeight: metaNameCandidates('viewportHeight'),
   waitAfterLoad: metaNameCandidates('waitAfterLoad'),
+  pruneInvisible: metaNameCandidates('pruneInvisible'),
 };
 
 // ---------------------------------------------------------------------------
@@ -117,6 +119,9 @@ export function extractMetaOptionsFromHtml(html: string): MetaRenderOptions {
 
   const waitAfterLoad = getMeta(OPTION_CANDIDATES.waitAfterLoad);
   if (waitAfterLoad !== null) { const n = parseInt(waitAfterLoad, 10); if (!isNaN(n) && n >= 0) opts.waitAfterLoad = n; }
+
+  const pruneInvisible = getMeta(OPTION_CANDIDATES.pruneInvisible);
+  if (pruneInvisible === 'true' || pruneInvisible === '1') opts.pruneInvisible = true;
 
   return opts;
 }

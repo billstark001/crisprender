@@ -77,6 +77,10 @@ msgstr "デフォルト"
 msgid "Download PDF"
 msgstr "PDFをダウンロード"
 
+#: src/pages/home/RenderForm.tsx
+msgid "Hide Preview"
+msgstr "プレビューを非表示"
+
 #: src/pages/home/MetaHelpDialog.tsx:152
 msgid "Example"
 msgstr "例"
@@ -174,6 +178,10 @@ msgstr "プレフィックスの順序：crisprender · crisp-render · cr · �
 msgid "Preview PDF"
 msgstr "PDFをプレビュー"
 
+#: src/pages/home/AdvancedOptions.tsx
+msgid "Prune invisible content"
+msgstr "不可視コンテンツを除去"
+
 #: src/pages/home/RenderForm.tsx:254
 msgid "Scale"
 msgstr "スケール"
@@ -226,3 +234,15 @@ msgstr "メタタグオプションとは何ですか？"
 #: src/pages/home/MetaHelpDialog.tsx:83
 msgid "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."
 msgstr "CrispRender のレンダリング設定を <meta> タグを使用して HTML ドキュメントに直接埋め込むことができます。これらの値はデフォルトとして機能し、フォームで設定したオプションに上書きされます。"
+
+#: src/pages/home/RenderForm.tsx
+msgid "Hide PDF preview"
+msgstr "PDFプレビューを非表示"
+
+#: src/pages/home/RenderForm.tsx
+msgid "PDF preview"
+msgstr "PDFプレビュー"
+
+#: src/pages/home/RenderForm.tsx
+msgid "Show PDF preview"
+msgstr "PDFプレビューを表示"

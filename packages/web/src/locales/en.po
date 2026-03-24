@@ -77,6 +77,10 @@ msgstr "Default"
 msgid "Download PDF"
 msgstr "Download PDF"
 
+#: src/pages/home/RenderForm.tsx
+msgid "Hide Preview"
+msgstr "Hide Preview"
+
 #: src/pages/home/MetaHelpDialog.tsx:152
 msgid "Example"
 msgstr "Example"
@@ -174,6 +178,10 @@ msgstr "Prefixes in order: crisprender · crisp-render · cr · (none)"
 msgid "Preview PDF"
 msgstr "Preview PDF"
 
+#: src/pages/home/AdvancedOptions.tsx
+msgid "Prune invisible content"
+msgstr "Prune invisible content"
+
 #: src/pages/home/RenderForm.tsx:254
 msgid "Scale"
 msgstr "Scale"
@@ -226,3 +234,15 @@ msgstr "What are meta tag options?"
 #: src/pages/home/MetaHelpDialog.tsx:83
 msgid "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."
 msgstr "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."
+
+#: src/pages/home/RenderForm.tsx
+msgid "Hide PDF preview"
+msgstr "Hide PDF preview"
+
+#: src/pages/home/RenderForm.tsx
+msgid "PDF preview"
+msgstr "PDF preview"
+
+#: src/pages/home/RenderForm.tsx
+msgid "Show PDF preview"
+msgstr "Show PDF preview"

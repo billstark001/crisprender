@@ -55,3 +55,12 @@ export const row = style({
     },
   },
 });
+
+export const pdfPreview = style({
+  display: 'block',
+  width: '100%',
+  height: '600px',
+  marginTop: vars.space['4'],
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+});

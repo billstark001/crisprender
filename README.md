@@ -34,17 +34,18 @@ See [docs/development.md](docs/development.md) for full setup instructions and t
 
 ### `POST /api/v1/pdf/generate`
 
-| Field           | Type                   | Description                                                       |
-|-----------------|------------------------|-------------------------------------------------------------------|
-| `html`          | `string`               | HTML content to render (mutually exclusive with `url`)            |
-| `url`           | `string`               | URL to navigate to (mutually exclusive with `html`)               |
-| `selector`      | `string`               | CSS selector for target element (optional)                        |
-| `scale`         | `number`               | Scale factor, default `1.0`                                       |
-| `format`        | `string`               | Paper format: `A0`–`A5`, `Letter`, `Legal` (optional)             |
-| `fitMode`       | `"contain" \| "none"`  | How to fit element on paper, default `"contain"`                  |
-| `viewportWidth` | `number`               | Headless browser viewport width in px, default `1280`             |
-| `viewportHeight`| `number`               | Headless browser viewport height in px, default `900`             |
-| `waitAfterLoad` | `number`               | Extra ms to wait after `networkidle0` before rendering, default `0` |
+| Field             | Type                   | Description                                                                                           |
+|-------------------|------------------------|-------------------------------------------------------------------------------------------------------|
+| `html`            | `string`               | HTML content to render (mutually exclusive with `url`)                                                |
+| `url`             | `string`               | URL to navigate to (mutually exclusive with `html`)                                                   |
+| `selector`        | `string`               | CSS selector for target element (optional)                                                            |
+| `scale`           | `number`               | Scale factor, default `1.0`                                                                           |
+| `format`          | `string`               | Paper format: `A0`–`A5`, `Letter`, `Legal` (optional)                                                 |
+| `fitMode`         | `"contain" \| "none"`  | How to fit element on paper, default `"contain"`                                                      |
+| `viewportWidth`   | `number`               | Headless browser viewport width in px, default `1280`                                                 |
+| `viewportHeight`  | `number`               | Headless browser viewport height in px, default `900`                                                 |
+| `waitAfterLoad`   | `number`               | Extra ms to wait after `networkidle0` before rendering, default `0`                                   |
+| `pruneInvisible`  | `boolean`              | Scroll to the element and shrink the viewport before capturing to reduce output file size, default `false` |
 
 Returns `application/pdf`.
 
@@ -96,13 +97,14 @@ The legacy name `pdf-target-selector` is also accepted as an alias for
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="crisprender-selector"      content="#chart">
-  <meta name="crisprender-scale"         content="2">
-  <meta name="crisprender-format"        content="A4">
-  <meta name="crisprender-fit-mode"      content="contain">
-  <meta name="crisprender-viewport-width"  content="1920">
-  <meta name="crisprender-viewport-height" content="1080">
-  <meta name="crisprender-wait-after-load" content="500">
+  <meta name="crisprender-selector"         content="#chart">
+  <meta name="crisprender-scale"            content="2">
+  <meta name="crisprender-format"           content="A4">
+  <meta name="crisprender-fit-mode"         content="contain">
+  <meta name="crisprender-viewport-width"   content="1920">
+  <meta name="crisprender-viewport-height"  content="1080">
+  <meta name="crisprender-wait-after-load"  content="500">
+  <meta name="crisprender-prune-invisible"  content="true">
 </head>
 <body>
   <div id="chart"><!-- your content --></div>

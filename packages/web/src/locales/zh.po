@@ -77,6 +77,10 @@ msgstr "默认"
 msgid "Download PDF"
 msgstr "下载PDF"
 
+#: src/pages/home/RenderForm.tsx
+msgid "Hide Preview"
+msgstr "隐藏预览"
+
 #: src/pages/home/MetaHelpDialog.tsx:152
 msgid "Example"
 msgstr "示例"
@@ -174,6 +178,10 @@ msgstr "前缀顺序：crisprender · crisp-render · cr · （无）"
 msgid "Preview PDF"
 msgstr "预览PDF"
 
+#: src/pages/home/AdvancedOptions.tsx
+msgid "Prune invisible content"
+msgstr "剔除不可见内容"
+
 #: src/pages/home/RenderForm.tsx:254
 msgid "Scale"
 msgstr "缩放比例"
@@ -226,3 +234,15 @@ msgstr "什么是Meta标签选项？"
 #: src/pages/home/MetaHelpDialog.tsx:83
 msgid "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."
 msgstr "您可以使用 <meta> 标签将 CrispRender 渲染设置直接嵌入 HTML 文档中。这些值作为默认值，可被表单中设置的任何选项覆盖。"
+
+#: src/pages/home/RenderForm.tsx
+msgid "Hide PDF preview"
+msgstr "隐藏PDF预览"
+
+#: src/pages/home/RenderForm.tsx
+msgid "PDF preview"
+msgstr "PDF预览"
+
+#: src/pages/home/RenderForm.tsx
+msgid "Show PDF preview"
+msgstr "显示PDF预览"
