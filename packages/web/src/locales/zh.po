@@ -13,12 +13,12 @@ msgstr ""
 "Plural-Forms: \n"
 
 #: src/pages/home/AdvancedOptions.tsx:25
-#: src/pages/home/RenderForm.tsx:66
+#: src/pages/home/RenderForm.tsx:98
 msgid "(default)"
 msgstr "（默认）"
 
 #: src/pages/home/AdvancedOptions.tsx:24
-#: src/pages/home/RenderForm.tsx:65
+#: src/pages/home/RenderForm.tsx:97
 msgid "(meta)"
 msgstr "（元数据）"
 
@@ -26,7 +26,7 @@ msgstr "（元数据）"
 msgid "Accepts .html, .htm"
 msgstr "接受 .html, .htm"
 
-#: src/pages/home/RenderForm.tsx:183
+#: src/pages/home/RenderForm.tsx:217
 msgid "An error occurred. Please try again."
 msgstr "发生错误，请重试。"
 
@@ -38,7 +38,7 @@ msgstr "可用选项"
 msgid "Click or drag an HTML file here"
 msgstr "点击此处上传，或拖拽 HTML 文件到此处"
 
-#: src/pages/home/RenderForm.tsx:48
+#: src/pages/home/RenderForm.tsx:80
 msgid "Contain"
 msgstr "包含"
 
@@ -63,17 +63,17 @@ msgstr "复制Meta标签"
 msgid "CrispRender"
 msgstr "CrispRender"
 
-#: src/pages/home/RenderForm.tsx:207
+#: src/pages/home/RenderForm.tsx:241
 msgid "CSS Selector"
 msgstr "CSS选择器"
 
 #: src/pages/home/MetaHelpDialog.tsx:95
-#: src/pages/home/RenderForm.tsx:42
-#: src/pages/home/RenderForm.tsx:47
+#: src/pages/home/RenderForm.tsx:74
+#: src/pages/home/RenderForm.tsx:79
 msgid "Default"
 msgstr "默认"
 
-#: src/pages/home/RenderForm.tsx:31
+#: src/pages/home/RenderForm.tsx:57
 msgid "Download PDF"
 msgstr "下载PDF"
 
@@ -85,7 +85,7 @@ msgstr "示例"
 msgid "File"
 msgstr "文件"
 
-#: src/pages/home/RenderForm.tsx:247
+#: src/pages/home/RenderForm.tsx:281
 msgid "Fit Mode"
 msgstr "适应模式"
 
@@ -101,11 +101,11 @@ msgstr "对于每个选项，CrispRender 会尝试 4 种大小写风格 × 4 种
 msgid "Form values override meta tags"
 msgstr "表单值将覆盖Meta标签中的设置"
 
-#: src/pages/home/RenderForm.tsx:267
+#: src/pages/home/RenderForm.tsx:301
 msgid "Generate PDF"
 msgstr "生成PDF"
 
-#: src/pages/home/RenderForm.tsx:267
+#: src/pages/home/RenderForm.tsx:301
 msgid "Generating..."
 msgstr "生成中..."
 
@@ -142,11 +142,11 @@ msgstr "命名规则"
 msgid "No meta tags detected in this HTML"
 msgstr "此HTML中未检测到Meta标签"
 
-#: src/pages/home/RenderForm.tsx:49
+#: src/pages/home/RenderForm.tsx:81
 msgid "None"
 msgstr "无"
 
-#: src/pages/home/RenderForm.tsx:43
+#: src/pages/home/RenderForm.tsx:75
 msgid "None (Illustration)"
 msgstr "无（插图模式）"
 
@@ -154,7 +154,7 @@ msgstr "无（插图模式）"
 msgid "Option"
 msgstr "选项"
 
-#: src/pages/home/RenderForm.tsx:234
+#: src/pages/home/RenderForm.tsx:268
 msgid "Paper Format"
 msgstr "纸张格式"
 
@@ -170,7 +170,11 @@ msgstr "由 Chromium 和 Hono 驱动"
 msgid "Prefixes in order: crisprender · crisp-render · cr · (none)"
 msgstr "前缀顺序：crisprender · crisp-render · cr · （无）"
 
-#: src/pages/home/RenderForm.tsx:220
+#: src/pages/home/RenderForm.tsx:61
+msgid "Preview PDF"
+msgstr "预览PDF"
+
+#: src/pages/home/RenderForm.tsx:254
 msgid "Scale"
 msgstr "缩放比例"
 

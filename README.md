@@ -12,6 +12,16 @@ Open <http://localhost:3000> in your browser.
 
 ## Quick Start (local, no Docker)
 
+In production mode:
+
+```bash
+pnpm install
+pnpm build
+RATE_LIMIT_FALLBACK_IP=localhost pnpm start
+```
+
+In development mode (with hot reload):
+
 ```bash
 pnpm install
 cp .env.example packages/server/.env
@@ -30,10 +40,10 @@ See [docs/development.md](docs/development.md) for full setup instructions and t
 | `url`           | `string`               | URL to navigate to (mutually exclusive with `html`)               |
 | `selector`      | `string`               | CSS selector for target element (optional)                        |
 | `scale`         | `number`               | Scale factor, default `1.0`                                       |
-| `format`        | `string`               | Paper format: `A0`–`A5`, `Letter`, `Legal` (optional)            |
-| `fitMode`       | `"contain" \| "none"` | How to fit element on paper, default `"contain"`                  |
-| `viewportWidth` | `number`               | Headless browser viewport width in px, default `1280`            |
-| `viewportHeight`| `number`               | Headless browser viewport height in px, default `900`            |
+| `format`        | `string`               | Paper format: `A0`–`A5`, `Letter`, `Legal` (optional)             |
+| `fitMode`       | `"contain" \| "none"`  | How to fit element on paper, default `"contain"`                  |
+| `viewportWidth` | `number`               | Headless browser viewport width in px, default `1280`             |
+| `viewportHeight`| `number`               | Headless browser viewport height in px, default `900`             |
 | `waitAfterLoad` | `number`               | Extra ms to wait after `networkidle0` before rendering, default `0` |
 
 Returns `application/pdf`.

@@ -6,7 +6,8 @@
     "dev": "pnpm --parallel --filter './packages/*' run dev",
     "dev:web": "pnpm --filter @crisprender/web run dev",
     "dev:server": "export RATE_LIMIT_FALLBACK_IP=127.0.0.1 && pnpm --filter @crisprender/server run dev",
-    "build": "pnpm --filter @crisprender/web run build && pnpm --filter @crisprender/server run build",
+    "copy:web:dist": "rm -rf ./packages/server/public && cp -r ./packages/web/dist ./packages/server/public",
+    "build": "pnpm --filter @crisprender/web run build && pnpm copy:web:dist && pnpm --filter @crisprender/server run build",
     "build:web": "pnpm --filter @crisprender/web run build",
     "build:server": "pnpm --filter @crisprender/server run build",
     "start": "pnpm --filter @crisprender/server run start"

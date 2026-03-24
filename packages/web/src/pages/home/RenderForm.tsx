@@ -40,14 +40,28 @@ interface ResultAreaProps {
 
 export function ResultArea({ pdfUrl, error, suggestedName = 'output' }: ResultAreaProps) {
   const { i18n } = useLingui();
+  const [previewOpen, setPreviewOpen] = useState(false);
   if (!pdfUrl && !error) return null;
+  const handlePreview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank', 'noopener');
+    }
+  };
   return (
     <div className={resultArea}>
       {error && <p className={errorText}>{error}</p>}
       {pdfUrl && (
-        <a className={successLink} href={pdfUrl} download={`${suggestedName}.pdf`}>
-          {i18n._(msg`Download PDF`)}
-        </a>
+        <>
+          <a className={successLink} href={pdfUrl} download={`${suggestedName}.pdf`}>
+            {i18n._(msg`Download PDF`)}
+          </a>
+          <span style={{ marginLeft: 16 }}>
+            <a className={successLink} href={pdfUrl} target="_blank" rel="noopener" onClick={handlePreview}>
+              {i18n._(msg`Preview PDF`)}
+            </a>
+          </span>
+        </>
       )}
     </div>
   );
