@@ -45,6 +45,8 @@ See [docs/development.md](docs/development.md) for full setup instructions and t
 | `viewportWidth`   | `number`               | Headless browser viewport width in px, default `1280`                                                 |
 | `viewportHeight`  | `number`               | Headless browser viewport height in px, default `900`                                                 |
 | `waitAfterLoad`   | `number`               | Extra ms to wait after `networkidle0` before rendering, default `0`                                   |
+| `injectAttribute` | `boolean`              | Inject `data-crisprender="true"` on `<body>` before rendering, default `true`                        |
+| `onRender`        | `string`               | If non-empty, invoke `window[onRender]()` with no arguments before rendering, default `""`            |
 | `pruneInvisible`  | `boolean`              | Scroll to the element and shrink the viewport before capturing to reduce output file size. When enabled, applies a Ghostscript + qpdf optimization pipeline via stdio pipes (memory-efficient). Concurrency is limited to prevent resource exhaustion. Default: `false` |
 
 Returns `application/pdf`.
@@ -125,6 +127,8 @@ The legacy name `pdf-target-selector` is also accepted as an alias for
   <meta name="crisprender-viewport-width"   content="1920">
   <meta name="crisprender-viewport-height"  content="1080">
   <meta name="crisprender-wait-after-load"  content="500">
+  <meta name="crisprender-inject-attribute" content="true">
+  <meta name="crisprender-on-render"        content="prepareForPdf">
   <meta name="crisprender-prune-invisible"  content="true">
 </head>
 <body>

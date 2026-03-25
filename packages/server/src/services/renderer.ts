@@ -24,6 +24,17 @@ export interface RenderOptions {
   /** Extra milliseconds to wait after page load before measuring / rendering (default: 0). */
   waitAfterLoad?: number;
   /**
+   * Inject `data-crisprender="true"` on `<body>` before rendering.
+   * Useful for environment-specific CSS or JS hooks. Default: true.
+   */
+  injectAttribute?: boolean;
+  /**
+   * Optional callback name under `window` to invoke before rendering.
+   * Example: `onRender: "prepareForPdf"` calls `window.prepareForPdf()`.
+   * Default: empty string (disabled).
+   */
+  onRender?: string;
+  /**
    * When true, scrolls the page to the target element and reduces the
    * headless-browser viewport to the element's dimensions before capturing
    * the intermediate PDF. This eliminates drawing commands for content that
@@ -84,6 +95,8 @@ const OPTION_CANDIDATES = {
   viewportWidth: metaNameCandidates('viewportWidth'),
   viewportHeight: metaNameCandidates('viewportHeight'),
   waitAfterLoad: metaNameCandidates('waitAfterLoad'),
+  injectAttribute: metaNameCandidates('injectAttribute'),
+  onRender: metaNameCandidates('onRender'),
   pruneInvisible: metaNameCandidates('pruneInvisible'),
 } as const satisfies Partial<Record<keyof RenderOptions, readonly string[]>>;
 
@@ -130,6 +143,9 @@ export async function extractMetaOptions(
   if (raw.viewportWidth !== undefined) { const n = parseInt(raw.viewportWidth, 10); if (!isNaN(n) && n > 0) opts.viewportWidth = n; }
   if (raw.viewportHeight !== undefined) { const n = parseInt(raw.viewportHeight, 10); if (!isNaN(n) && n > 0) opts.viewportHeight = n; }
   if (raw.waitAfterLoad !== undefined) { const n = parseInt(raw.waitAfterLoad, 10); if (!isNaN(n) && n >= 0) opts.waitAfterLoad = n; }
+  if (raw.injectAttribute === 'true' || raw.injectAttribute === '1') opts.injectAttribute = true;
+  if (raw.injectAttribute === 'false' || raw.injectAttribute === '0') opts.injectAttribute = false;
+  if (raw.onRender !== undefined) opts.onRender = raw.onRender;
   if (raw.pruneInvisible === 'true' || raw.pruneInvisible === '1') opts.pruneInvisible = true;
   return opts;
 }
@@ -354,6 +370,8 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       format,
       fitMode = 'contain',
       waitAfterLoad = 0,
+      injectAttribute = true,
+      onRender = '',
       pruneInvisible = false,
     } = { ...metaOpts, ...options };
 
@@ -363,6 +381,23 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
     const resolvedVH = options.viewportHeight ?? metaOpts.viewportHeight ?? 900;
     if (resolvedVW !== viewportWidth || resolvedVH !== viewportHeight) {
       await page.setViewport({ width: resolvedVW, height: resolvedVH });
+    }
+
+    if (injectAttribute) {
+      await page.evaluate(() => {
+        document.body?.setAttribute('data-crisprender', 'true');
+      });
+    }
+
+    const callbackName = onRender.trim();
+    if (callbackName) {
+      await page.evaluate(async (fnName) => {
+        const callback = (window as unknown as Record<string, unknown>)[fnName];
+        if (typeof callback !== 'function') {
+          throw new Error(`window.${fnName} is not a function`);
+        }
+        await Promise.resolve((callback as () => unknown)());
+      }, callbackName);
     }
 
     // Optional extra delay for JS-driven animations (e.g. D3 force simulations)

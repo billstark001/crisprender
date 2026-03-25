@@ -50,6 +50,15 @@ export function MetaTagPanel({ detectedMeta, copied, onCopyMeta, onHelpClick }: 
           {detectedMeta.waitAfterLoad !== undefined && (
             <li className={metaHintItem}><strong>waitAfterLoad</strong>: {detectedMeta.waitAfterLoad}ms</li>
           )}
+          {detectedMeta.injectAttribute !== undefined && (
+            <li className={metaHintItem}><strong>injectAttribute</strong>: {String(detectedMeta.injectAttribute)}</li>
+          )}
+          {detectedMeta.onRender !== undefined && (
+            <li className={metaHintItem}><strong>onRender</strong>: {detectedMeta.onRender || '""'}</li>
+          )}
+          {detectedMeta.pruneInvisible !== undefined && (
+            <li className={metaHintItem}><strong>pruneInvisible</strong>: {String(detectedMeta.pruneInvisible)}</li>
+          )}
         </ul>
       ) : (
         <p className={metaHintEmpty}>{i18n._(msg`No meta tags detected in this HTML`)}</p>

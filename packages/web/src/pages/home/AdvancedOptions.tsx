@@ -8,6 +8,8 @@ interface AdvancedOptionsValues {
   viewportWidth: string;
   viewportHeight: string;
   waitAfterLoad: string;
+  injectAttribute: string;
+  onRender: string;
   pruneInvisible: string;
 }
 
@@ -75,6 +77,34 @@ export function AdvancedOptions({ show, onToggle, detectedMeta, values, onChange
             }
             value={values.waitAfterLoad}
             onChange={(e) => onChange('waitAfterLoad', e.target.value)}
+          />
+          <label className={checkboxRow}>
+            <input
+              type="checkbox"
+              id="injectAttribute"
+              checked={
+                values.injectAttribute === 'true'
+                || (values.injectAttribute === '' && detectedMeta.injectAttribute !== false)
+              }
+              onChange={(e) => onChange('injectAttribute', e.target.checked ? 'true' : 'false')}
+            />
+            <span>
+              {i18n._(msg`Inject CrispRender attribute`)}
+              {detectedMeta.injectAttribute !== undefined && values.injectAttribute === '' && (
+                <span style={{ marginLeft: 4, opacity: 0.6 }}>{metaPrefix}</span>
+              )}
+            </span>
+          </label>
+          <Input
+            id="onRender"
+            label={i18n._(msg`On Render callback (window fn)`)}
+            placeholder={
+              detectedMeta.onRender !== undefined
+                ? `${detectedMeta.onRender} ${metaPrefix}`
+                : `${defaultPrefix}`
+            }
+            value={values.onRender}
+            onChange={(e) => onChange('onRender', e.target.value)}
           />
           <label className={checkboxRow}>
             <input

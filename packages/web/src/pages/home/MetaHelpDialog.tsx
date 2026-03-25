@@ -24,6 +24,8 @@ const AI_PROMPT = `When generating or modifying HTML for CrispRender (a Vector-p
   crisprender-viewport-width  Headless browser viewport width in px (default 1280).
   crisprender-viewport-height Headless browser viewport height in px (default 900).
   crisprender-wait-after-load Extra milliseconds to wait after networkidle0 before rendering (default 0).
+  crisprender-inject-attribute When "true", injects data-crisprender="true" on <body> before rendering (default true).
+  crisprender-on-render        If non-empty, calls window[content]() with no arguments before rendering (default empty).
   crisprender-prune-invisible When "true", scrolls to the element and reduces the viewport to its size
                               before capturing the PDF, eliminating off-screen drawing commands and
                               producing a smaller output file (default false).
@@ -38,6 +40,8 @@ Example head section:
 <meta name="crisprender-viewport-width"   content="1920">
 <meta name="crisprender-viewport-height"  content="1080">
 <meta name="crisprender-wait-after-load"  content="500">
+<meta name="crisprender-inject-attribute" content="true">
+<meta name="crisprender-on-render"        content="prepareForPdf">
 <meta name="crisprender-prune-invisible"  content="true">
 
 These values act as defaults and are overridden by options explicitly supplied in the API request body.`;
@@ -52,6 +56,8 @@ const EXAMPLE_HTML = `<!DOCTYPE html>
   <meta name="crisprender-viewport-width"   content="1920">
   <meta name="crisprender-viewport-height"  content="1080">
   <meta name="crisprender-wait-after-load"  content="500">
+  <meta name="crisprender-inject-attribute" content="true">
+  <meta name="crisprender-on-render"        content="prepareForPdf">
   <meta name="crisprender-prune-invisible"  content="true">
 </head>
 <body>
@@ -109,6 +115,8 @@ export function MetaHelpDialog({ open, onClose }: MetaHelpDialogProps) {
               { name: 'viewportWidth', type: 'number (px)', def: '1280' },
               { name: 'viewportHeight', type: 'number (px)', def: '900' },
               { name: 'waitAfterLoad', type: 'number (ms)', def: '0' },
+              { name: 'injectAttribute', type: 'boolean', def: 'true' },
+              { name: 'onRender', type: 'string', def: '""' },
               { name: 'pruneInvisible', type: 'boolean', def: 'false' },
             ].map(({ name, type, def }) => (
               <tr key={name}>

@@ -55,6 +55,8 @@ RendererService
   │  — emulate screen media
   │  — load content  (setContent / goto)
   │  — extract meta-tag options
+  │  — [injectAttribute] set body[data-crisprender="true"]
+  │  — [onRender] call window[onRender]()
   │  — resolve selector
   │  — measure bbox
   │  — [pruneInvisible] scroll to element, shrink viewport

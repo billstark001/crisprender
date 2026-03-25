@@ -116,6 +116,8 @@ export function RenderForm() {
     viewportWidth: '',
     viewportHeight: '',
     waitAfterLoad: '',
+    injectAttribute: '',
+    onRender: '',
     pruneInvisible: '',
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -160,6 +162,13 @@ export function RenderForm() {
 
     const wal = advancedValues.waitAfterLoad.trim() || (detectedMeta.waitAfterLoad !== undefined ? String(detectedMeta.waitAfterLoad) : '0');
     lines.push(`<meta name="crisprender-wait-after-load" content="${wal}">`);
+
+    const ia = advancedValues.injectAttribute === 'true'
+      || (advancedValues.injectAttribute === '' && detectedMeta.injectAttribute !== false);
+    lines.push(`<meta name="crisprender-inject-attribute" content="${ia}">`);
+
+    const or = advancedValues.onRender.trim() || detectedMeta.onRender || '';
+    lines.push(`<meta name="crisprender-on-render" content="${or}">`);
 
     const pi = advancedValues.pruneInvisible === 'true' || (advancedValues.pruneInvisible === '' && detectedMeta.pruneInvisible === true);
     lines.push(`<meta name="crisprender-prune-invisible" content="${pi}">`);
@@ -210,6 +219,9 @@ export function RenderForm() {
       if (!isNaN(vh) && vh > 0) body.viewportHeight = vh;
       const wal = parseInt(advancedValues.waitAfterLoad, 10);
       if (!isNaN(wal) && wal >= 0) body.waitAfterLoad = wal;
+      if (advancedValues.injectAttribute === 'true') body.injectAttribute = true;
+      else if (advancedValues.injectAttribute === 'false') body.injectAttribute = false;
+      if (advancedValues.onRender.trim()) body.onRender = advancedValues.onRender.trim();
       if (advancedValues.pruneInvisible === 'true') body.pruneInvisible = true;
       else if (advancedValues.pruneInvisible === 'false') body.pruneInvisible = false;
 
