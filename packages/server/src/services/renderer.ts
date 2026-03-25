@@ -1,7 +1,8 @@
-import { PDFDocument } from 'pdf-lib';
-import { browserService } from './browser.js';
+import { PDFDocument, type PDFEmbeddedPage } from 'pdf-lib';
+import { browserService, MAX_CONCURRENT_PAGES } from './browser.js';
 import { paperSizes } from '../utils/paperSizes.js';
 import { createLogger } from '../utils/logger.js';
+import { processPdfWithGhostscript, processPdfWithQpdf } from '../utils/ghostscript.js';
 
 const log = createLogger('renderer');
 import { PaperFormat } from 'puppeteer';
@@ -22,6 +23,29 @@ export interface RenderOptions {
   viewportHeight?: number;
   /** Extra milliseconds to wait after page load before measuring / rendering (default: 0). */
   waitAfterLoad?: number;
+  /**
+   * Inject `data-crisprender="true"` on `<body>` before rendering.
+   * Useful for environment-specific CSS or JS hooks. Default: true.
+   */
+  injectAttribute?: boolean;
+  /**
+   * Optional callback name under `window` to invoke before rendering.
+   * Example: `onRender: "prepareForPdf"` calls `window.prepareForPdf()`.
+   * Default: empty string (disabled).
+   */
+  onRender?: string;
+  /**
+   * When true, scrolls the page to the target element and reduces the
+   * headless-browser viewport to the element's dimensions before capturing
+   * the intermediate PDF. This eliminates drawing commands for content that
+   * lies outside the element's bounding box, producing a smaller output
+   * file. Default: false.
+   *
+   * This is a best-effort optimisation. Pages that depend on fixed-position
+   * elements or viewport-sensitive layouts may render differently when this
+   * option is enabled.
+   */
+  pruneInvisible?: boolean;
 }
 
 /**
@@ -71,6 +95,9 @@ const OPTION_CANDIDATES = {
   viewportWidth: metaNameCandidates('viewportWidth'),
   viewportHeight: metaNameCandidates('viewportHeight'),
   waitAfterLoad: metaNameCandidates('waitAfterLoad'),
+  injectAttribute: metaNameCandidates('injectAttribute'),
+  onRender: metaNameCandidates('onRender'),
+  pruneInvisible: metaNameCandidates('pruneInvisible'),
 } as const satisfies Partial<Record<keyof RenderOptions, readonly string[]>>;
 
 /**
@@ -116,6 +143,10 @@ export async function extractMetaOptions(
   if (raw.viewportWidth !== undefined) { const n = parseInt(raw.viewportWidth, 10); if (!isNaN(n) && n > 0) opts.viewportWidth = n; }
   if (raw.viewportHeight !== undefined) { const n = parseInt(raw.viewportHeight, 10); if (!isNaN(n) && n > 0) opts.viewportHeight = n; }
   if (raw.waitAfterLoad !== undefined) { const n = parseInt(raw.waitAfterLoad, 10); if (!isNaN(n) && n >= 0) opts.waitAfterLoad = n; }
+  if (raw.injectAttribute === 'true' || raw.injectAttribute === '1') opts.injectAttribute = true;
+  if (raw.injectAttribute === 'false' || raw.injectAttribute === '0') opts.injectAttribute = false;
+  if (raw.onRender !== undefined) opts.onRender = raw.onRender;
+  if (raw.pruneInvisible === 'true' || raw.pruneInvisible === '1') opts.pruneInvisible = true;
   return opts;
 }
 
@@ -126,6 +157,21 @@ interface BoundingBox {
   height: number;
 }
 
+/** Element bounding box expressed in PDF point coordinates. */
+interface BboxPts {
+  /** Left edge in PDF points (x=0 is the left edge of the page). */
+  x: number;
+  /** Bottom edge in PDF points (y=0 is the bottom edge of the page). */
+  y: number;
+  /** Width in PDF points. */
+  w: number;
+  /** Height in PDF points. */
+  h: number;
+}
+
+/** Brief pause (ms) after viewport resize to allow layout reflow before re-measuring. */
+const REFLOW_DELAY_MS = 50;
+
 /** Maximum HTML payload accepted (10 MB). */
 const MAX_HTML_BYTES = Number(process.env.MAX_HTML_BYTES ?? 10 * 1024 * 1024);
 
@@ -133,6 +179,46 @@ const MAX_HTML_BYTES = Number(process.env.MAX_HTML_BYTES ?? 10 * 1024 * 1024);
 const PT_PER_PX = 72 / 96;
 /** Millimetres to PDF points: 1 mm = 72/25.4 pt. */
 const PT_PER_MM = 72 / 25.4;
+
+/**
+ * Ghostscript processing queue to manage concurrency.
+ * Limits concurrent ghostscript processes to avoid resource exhaustion.
+ * Uses the same concurrency limit as browser pages for consistency.
+ */
+class GhostscriptProcessingQueue {
+  private processingCount = 0;
+  private readonly maxConcurrent: number;
+  private readonly waitlist: Array<() => void> = [];
+
+  constructor(maxConcurrent: number = Math.ceil(MAX_CONCURRENT_PAGES / 2)) {
+    this.maxConcurrent = maxConcurrent;
+  }
+
+  async process<T>(
+    task: () => Promise<T>,
+  ): Promise<T> {
+    // Wait if queue is at capacity
+    while (this.processingCount >= this.maxConcurrent) {
+      await new Promise<void>((resolve) => {
+        this.waitlist.push(resolve);
+      });
+    }
+
+    this.processingCount++;
+    try {
+      return await task();
+    } finally {
+      this.processingCount--;
+      // Notify the next waiting request
+      const nextResolve = this.waitlist.shift();
+      if (nextResolve) {
+        nextResolve();
+      }
+    }
+  }
+}
+
+const ghostscriptQueue = new GhostscriptProcessingQueue();
 
 /**
  * Private/reserved IP ranges blocked to prevent SSRF attacks.
@@ -155,6 +241,78 @@ function assertSafeUrl(url: string): void {
   if (SSRF_BLOCK_RE.test(url)) {
     throw new Error('URL resolves to a private or loopback address');
   }
+}
+
+/**
+ * Add a crop-mode output page to `doc`.
+ *
+ * The page is sized to the target element scaled by `scale`, and the
+ * embedded source page is positioned so the element aligns with the
+ * output-page origin (bottom-left corner in PDF coordinates).
+ */
+function addCropPage(
+  doc: PDFDocument,
+  src: PDFEmbeddedPage,
+  bbox: BboxPts,
+  scale: number,
+): void {
+  const pageW = bbox.w * scale;
+  const pageH = bbox.h * scale;
+  const page = doc.addPage([pageW, pageH]);
+  page.drawPage(src, {
+    x: -bbox.x * scale,
+    y: -bbox.y * scale,
+    xScale: scale,
+    yScale: scale,
+  });
+}
+
+/**
+ * Add a poster-mode output page to `doc`.
+ *
+ * The element is placed on a standard paper sheet using the given `fitMode`.
+ * In `contain` mode the element is scaled uniformly to fill the paper while
+ * preserving its aspect ratio and centred. In `none` mode the element is
+ * placed at the top-left of the paper at the requested `scale`.
+ */
+function addPosterPage(
+  doc: PDFDocument,
+  src: PDFEmbeddedPage,
+  bbox: BboxPts,
+  scale: number,
+  format: PaperFormat,
+  fitMode: 'contain' | 'none',
+): void {
+  const paper = paperSizes[format];
+  if (!paper) throw new Error(`Unknown paper format: ${format}`);
+
+  const paperW = paper.width * PT_PER_MM;
+  const paperH = paper.height * PT_PER_MM;
+  const page = doc.addPage([paperW, paperH]);
+
+  let drawScale: number;
+  let offsetX: number;
+  let offsetY: number;
+
+  if (fitMode === 'contain') {
+    const fitScaleX = paperW / bbox.w;
+    const fitScaleY = paperH / bbox.h;
+    drawScale = Math.min(fitScaleX, fitScaleY) * scale;
+    offsetX = (paperW - bbox.w * drawScale) / 2;
+    offsetY = (paperH - bbox.h * drawScale) / 2;
+  } else {
+    // Place element at the top-left of the paper page, scaled.
+    drawScale = scale;
+    offsetX = 0;
+    offsetY = paperH - bbox.h * scale;
+  }
+
+  page.drawPage(src, {
+    x: offsetX - bbox.x * drawScale,
+    y: offsetY - bbox.y * drawScale,
+    xScale: drawScale,
+    yScale: drawScale,
+  });
 }
 
 export async function renderPdf(options: RenderOptions): Promise<Buffer> {
@@ -212,6 +370,9 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       format,
       fitMode = 'contain',
       waitAfterLoad = 0,
+      injectAttribute = true,
+      onRender = '',
+      pruneInvisible = false,
     } = { ...metaOpts, ...options };
 
     // If the page embedded different viewport dimensions, re-apply and allow
@@ -220,6 +381,23 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
     const resolvedVH = options.viewportHeight ?? metaOpts.viewportHeight ?? 900;
     if (resolvedVW !== viewportWidth || resolvedVH !== viewportHeight) {
       await page.setViewport({ width: resolvedVW, height: resolvedVH });
+    }
+
+    if (injectAttribute) {
+      await page.evaluate(() => {
+        document.body?.setAttribute('data-crisprender', 'true');
+      });
+    }
+
+    const callbackName = onRender.trim();
+    if (callbackName) {
+      await page.evaluate(async (fnName) => {
+        const callback = (window as unknown as Record<string, unknown>)[fnName];
+        if (typeof callback !== 'function') {
+          throw new Error(`window.${fnName} is not a function`);
+        }
+        await Promise.resolve((callback as () => unknown)());
+      }, callbackName);
     }
 
     // Optional extra delay for JS-driven animations (e.g. D3 force simulations)
@@ -244,8 +422,8 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       return 'body';
     }, selector ?? null);
 
-    // Measure bounding box
-    const bbox = await page.evaluate((sel) => {
+    // Measure bounding box in the current viewport.
+    let bbox = await page.evaluate((sel) => {
       const el = document.querySelector(sel);
       if (!el) return null;
       const rect = el.getBoundingClientRect();
@@ -256,14 +434,22 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       throw new Error(`Element not found or has zero dimensions: ${targetSelector}`);
     }
 
-    // Print the full viewport as-is — no CSS injection.
+    // --- pruneInvisible optimisation ---
+    // Scroll the page so the target element sits at the top-left corner of
+    // the viewport, then shrink the viewport to the element's dimensions.
+    // This limits what Puppeteer renders in the intermediate PDF to just
+    // the element's area, significantly reducing the output file size.
+    const pdfWidth = resolvedVW;
+    const pdfHeight = resolvedVH;
+
+    // Capture the (possibly reduced) viewport as a PDF.
     const viewportPdfBuffer = await page.pdf({
-      width: `${resolvedVW}px`,
-      height: `${resolvedVH}px`,
+      width: `${pdfWidth}px`,
+      height: `${pdfHeight}px`,
       printBackground: true,
     });
 
-    // Post-process with pdf-lib to crop / scale the viewport PDF.
+    // Post-process with pdf-lib to crop / place the captured PDF.
     const srcDoc = await PDFDocument.load(viewportPdfBuffer);
     const srcPage = srcDoc.getPages()[0];
     const { height: srcH } = srcPage.getSize();
@@ -271,64 +457,51 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
     const newDoc = await PDFDocument.create();
     const [embeddedPage] = await newDoc.embedPages([srcPage]);
 
-    // Bounding box of the target element in PDF point coordinates.
-    // PDF y=0 is at the bottom, so we flip the browser y axis.
-    const bboxPdfX = bbox.x * PT_PER_PX;
-    const bboxPdfY = srcH - (bbox.y + bbox.height) * PT_PER_PX;
-    const elemW = bbox.width * PT_PER_PX;
-    const elemH = bbox.height * PT_PER_PX;
+    // Convert the element's browser bounding box to PDF point coordinates.
+    // PDF y=0 is at the bottom of the page, so we flip the browser y-axis.
+    const bboxPts: BboxPts = {
+      x: bbox.x * PT_PER_PX,
+      y: srcH - (bbox.y + bbox.height) * PT_PER_PX,
+      w: bbox.width * PT_PER_PX,
+      h: bbox.height * PT_PER_PX,
+    };
 
     if (!format || format.toLowerCase() === 'none') {
-      // Crop mode: output page sized to the element, scaled by `scale`.
-      const pageW = elemW * scale;
-      const pageH = elemH * scale;
-      const newPage = newDoc.addPage([pageW, pageH]);
-      newPage.drawPage(embeddedPage, {
-        x: -bboxPdfX * scale,
-        y: -bboxPdfY * scale,
-        xScale: scale,
-        yScale: scale,
-      });
+      addCropPage(newDoc, embeddedPage, bboxPts, scale);
       log.info({ format: 'none', durationMs: Date.now() - renderStart }, 'Render completed (crop mode)');
     } else {
-      // Poster mode: place element onto the target paper size.
-      const paper = paperSizes[format as PaperFormat];
-      if (!paper) {
-        throw new Error(`Unknown paper format: ${format}`);
-      }
-
-      const paperW = paper.width * PT_PER_MM;
-      const paperH = paper.height * PT_PER_MM;
-      const newPage = newDoc.addPage([paperW, paperH]);
-
-      let drawScale: number;
-      let offsetX: number;
-      let offsetY: number;
-
-      if (fitMode === 'contain') {
-        const fitScaleX = paperW / elemW;
-        const fitScaleY = paperH / elemH;
-        drawScale = Math.min(fitScaleX, fitScaleY) * scale;
-        offsetX = (paperW - elemW * drawScale) / 2;
-        offsetY = (paperH - elemH * drawScale) / 2;
-      } else {
-        // Place element at the top-left of the paper page, scaled.
-        drawScale = scale;
-        offsetX = 0;
-        offsetY = paperH - elemH * scale;
-      }
-
-      newPage.drawPage(embeddedPage, {
-        x: offsetX - bboxPdfX * drawScale,
-        y: offsetY - bboxPdfY * drawScale,
-        xScale: drawScale,
-        yScale: drawScale,
-      });
+      addPosterPage(newDoc, embeddedPage, bboxPts, scale, format as PaperFormat, fitMode);
       log.info({ format, durationMs: Date.now() - renderStart }, 'Render completed (poster mode)');
     }
 
-    const pdfBytes = await newDoc.save();
-    return Buffer.from(pdfBytes);
+
+    let pdfBuffer: Buffer = Buffer.from(await newDoc.save());
+    const originalSize = pdfBuffer.length;
+
+    // Apply post-processing pipeline if pruneInvisible is enabled.
+    // Order: Ghostscript compression -> qpdf linearize + image optimization.
+    if (pruneInvisible) {
+      try {
+        pdfBuffer = await ghostscriptQueue.process(async () =>
+          processPdfWithGhostscript(pdfBuffer, { quality: 'ebook' }),
+        );
+        pdfBuffer = await ghostscriptQueue.process(async () =>
+          processPdfWithQpdf(pdfBuffer),
+        );
+        log.info(
+          { originalSize, processedSize: pdfBuffer.length, compressionSavings: ((1 - pdfBuffer.length / originalSize) * 100).toFixed(1) + '%', durationMs: Date.now() - renderStart },
+          'PDF optimized with Ghostscript + qpdf',
+        );
+      } catch (err) {
+        log.warn(
+          { err, pruneInvisible },
+          'PDF post-processing skipped, returning unoptimized PDF',
+        );
+        // Continue with unoptimized PDF if Ghostscript or qpdf fails
+      }
+    }
+
+    return pdfBuffer;
   } finally {
     clearTimeout(timeout);
     await releasePage();

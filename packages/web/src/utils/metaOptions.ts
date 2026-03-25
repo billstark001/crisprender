@@ -15,6 +15,9 @@ export type MetaRenderOptions = {
   viewportWidth?: number;
   viewportHeight?: number;
   waitAfterLoad?: number;
+  injectAttribute?: boolean;
+  onRender?: string;
+  pruneInvisible?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -63,6 +66,9 @@ export const OPTION_CANDIDATES: Record<keyof MetaRenderOptions, string[]> = {
   viewportWidth: metaNameCandidates('viewportWidth'),
   viewportHeight: metaNameCandidates('viewportHeight'),
   waitAfterLoad: metaNameCandidates('waitAfterLoad'),
+  injectAttribute: metaNameCandidates('injectAttribute'),
+  onRender: metaNameCandidates('onRender'),
+  pruneInvisible: metaNameCandidates('pruneInvisible'),
 };
 
 // ---------------------------------------------------------------------------
@@ -117,6 +123,16 @@ export function extractMetaOptionsFromHtml(html: string): MetaRenderOptions {
 
   const waitAfterLoad = getMeta(OPTION_CANDIDATES.waitAfterLoad);
   if (waitAfterLoad !== null) { const n = parseInt(waitAfterLoad, 10); if (!isNaN(n) && n >= 0) opts.waitAfterLoad = n; }
+
+  const injectAttribute = getMeta(OPTION_CANDIDATES.injectAttribute);
+  if (injectAttribute === 'true' || injectAttribute === '1') opts.injectAttribute = true;
+  if (injectAttribute === 'false' || injectAttribute === '0') opts.injectAttribute = false;
+
+  const onRender = getMeta(OPTION_CANDIDATES.onRender);
+  if (onRender !== null) opts.onRender = onRender;
+
+  const pruneInvisible = getMeta(OPTION_CANDIDATES.pruneInvisible);
+  if (pruneInvisible === 'true' || pruneInvisible === '1') opts.pruneInvisible = true;
 
   return opts;
 }

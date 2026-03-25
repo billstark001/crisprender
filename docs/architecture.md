@@ -17,7 +17,7 @@ crisprender/
 - **Hono**: Lightweight HTTP framework running on Node.js via `@hono/node-server`
 - **Puppeteer**: Headless Chromium for pixel-perfect PDF rendering
 - **BrowserService**: Singleton managing a shared Chromium instance with a concurrency cap
-- **RendererService**: Converts HTML/URL to PDF with configurable paper formats
+- **RendererService**: Converts HTML/URL to PDF with configurable paper formats. Modular helper functions (`addCropPage`, `addPosterPage`) handle the two rendering modes independently.
 - **hono-rate-limiter**: Per-IP sliding-window rate limiter on the generate endpoint
 - **hono/body-limit**: Rejects oversized request bodies before parsing
 - **hono/timeout**: Hard HTTP-level timeout per request
@@ -54,11 +54,15 @@ RendererService
   │  — 15 s internal timeout
   │  — emulate screen media
   │  — load content  (setContent / goto)
+  │  — extract meta-tag options
+  │  — [injectAttribute] set body[data-crisprender="true"]
+  │  — [onRender] call window[onRender]()
   │  — resolve selector
   │  — measure bbox
-  │  — inject CSS
+  │  — [pruneInvisible] scroll to element, shrink viewport
   │  — page.pdf()
   │  — release page
+  │  — pdf-lib post-processing: addCropPage or addPosterPage
   ▼
 HTTP Response  application/pdf
 ```

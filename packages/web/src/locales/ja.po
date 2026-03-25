@@ -12,13 +12,13 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/pages/home/AdvancedOptions.tsx:25
-#: src/pages/home/RenderForm.tsx:98
+#: src/pages/home/AdvancedOptions.tsx:28
+#: src/pages/home/RenderForm.tsx:105
 msgid "(default)"
 msgstr "（デフォルト）"
 
-#: src/pages/home/AdvancedOptions.tsx:24
-#: src/pages/home/RenderForm.tsx:97
+#: src/pages/home/AdvancedOptions.tsx:27
+#: src/pages/home/RenderForm.tsx:104
 msgid "(meta)"
 msgstr "（メタデータ）"
 
@@ -26,11 +26,11 @@ msgstr "（メタデータ）"
 msgid "Accepts .html, .htm"
 msgstr "許容拡張子：.html, .htm"
 
-#: src/pages/home/RenderForm.tsx:217
+#: src/pages/home/RenderForm.tsx:242
 msgid "An error occurred. Please try again."
 msgstr "エラーが発生しました。もう一度お試しください。"
 
-#: src/pages/home/MetaHelpDialog.tsx:89
+#: src/pages/home/MetaHelpDialog.tsx:100
 msgid "Available options"
 msgstr "利用可能なオプション"
 
@@ -38,24 +38,24 @@ msgstr "利用可能なオプション"
 msgid "Click or drag an HTML file here"
 msgstr "ここでHTMLファイルをアップロード・ドラッグしてください"
 
-#: src/pages/home/RenderForm.tsx:80
+#: src/pages/home/RenderForm.tsx:87
 msgid "Contain"
 msgstr "含む"
 
-#: src/pages/home/MetaHelpDialog.tsx:165
-#: src/pages/home/MetaTagPanel.tsx:60
+#: src/pages/home/MetaHelpDialog.tsx:179
+#: src/pages/home/MetaTagPanel.tsx:69
 msgid "Copied!"
 msgstr "コピーしました！"
 
-#: src/pages/home/MetaHelpDialog.tsx:162
+#: src/pages/home/MetaHelpDialog.tsx:176
 msgid "Copy a ready-made prompt for AI assistants describing how to embed CrispRender meta tags."
 msgstr "CrispRenderメタタグの埋め込み方法を説明する、AIアシスタント用の既成プロンプトをコピーしてください。"
 
-#: src/pages/home/MetaHelpDialog.tsx:165
+#: src/pages/home/MetaHelpDialog.tsx:179
 msgid "Copy AI Prompt"
 msgstr "AI用プロンプトをコピー"
 
-#: src/pages/home/MetaTagPanel.tsx:60
+#: src/pages/home/MetaTagPanel.tsx:69
 msgid "Copy meta tags"
 msgstr "メタタグをコピー"
 
@@ -63,21 +63,21 @@ msgstr "メタタグをコピー"
 msgid "CrispRender"
 msgstr "CrispRender"
 
-#: src/pages/home/RenderForm.tsx:241
+#: src/pages/home/RenderForm.tsx:266
 msgid "CSS Selector"
 msgstr "CSSセレクター"
 
-#: src/pages/home/MetaHelpDialog.tsx:95
-#: src/pages/home/RenderForm.tsx:74
-#: src/pages/home/RenderForm.tsx:79
+#: src/pages/home/MetaHelpDialog.tsx:106
+#: src/pages/home/RenderForm.tsx:81
+#: src/pages/home/RenderForm.tsx:86
 msgid "Default"
 msgstr "デフォルト"
 
-#: src/pages/home/RenderForm.tsx:57
+#: src/pages/home/RenderForm.tsx:51
 msgid "Download PDF"
 msgstr "PDFをダウンロード"
 
-#: src/pages/home/MetaHelpDialog.tsx:152
+#: src/pages/home/MetaHelpDialog.tsx:166
 msgid "Example"
 msgstr "例"
 
@@ -85,33 +85,41 @@ msgstr "例"
 msgid "File"
 msgstr "ファイル"
 
-#: src/pages/home/RenderForm.tsx:281
+#: src/pages/home/RenderForm.tsx:306
 msgid "Fit Mode"
 msgstr "フィットモード"
 
-#: src/pages/home/MetaHelpDialog.tsx:128
+#: src/pages/home/MetaHelpDialog.tsx:142
 msgid "fitMode example"
 msgstr "fitMode の例"
 
-#: src/pages/home/MetaHelpDialog.tsx:122
+#: src/pages/home/MetaHelpDialog.tsx:136
 msgid "For each option CrispRender tries every combination of 4 case styles × 4 prefixes (first match wins)."
 msgstr "各オプションについて、CrispRender は 4 つのケーススタイル × 4 つのプレフィックスのすべての組み合わせを試みます（最初の一致が優先されます）。"
 
-#: src/pages/home/MetaTagPanel.tsx:58
+#: src/pages/home/MetaTagPanel.tsx:67
 msgid "Form values override meta tags"
 msgstr "フォームの値はメタタグより優先されます"
 
-#: src/pages/home/RenderForm.tsx:301
+#: src/pages/home/RenderForm.tsx:326
 msgid "Generate PDF"
 msgstr "PDFを生成"
 
-#: src/pages/home/RenderForm.tsx:301
+#: src/pages/home/RenderForm.tsx:326
 msgid "Generating..."
 msgstr "生成中..."
 
-#: src/pages/home/AdvancedOptions.tsx:30
+#: src/pages/home/AdvancedOptions.tsx:33
 msgid "Hide advanced options ▲"
 msgstr "詳細設定を隠す ▲"
+
+#: src/pages/home/RenderForm.tsx:57
+msgid "Hide PDF preview"
+msgstr "PDFプレビューを非表示"
+
+#: src/pages/home/RenderForm.tsx:60
+msgid "Hide Preview"
+msgstr "プレビューを非表示"
 
 #: src/pages/home/HtmlSourceTabs.tsx:103
 msgid "HTML"
@@ -125,6 +133,10 @@ msgstr "HTMLコンテンツ"
 msgid "https://example.com"
 msgstr "https://example.com"
 
+#: src/pages/home/AdvancedOptions.tsx:92
+msgid "Inject CrispRender attribute"
+msgstr "CrispRender 属性を注入"
+
 #: src/pages/home/MetaTagPanel.tsx:26
 #: src/pages/home/MetaTagPanel.tsx:27
 msgid "Learn how to use meta tags"
@@ -134,27 +146,31 @@ msgstr "メタタグの使い方を学ぶ"
 msgid "Meta tag options"
 msgstr "メタタグオプション"
 
-#: src/pages/home/MetaHelpDialog.tsx:120
+#: src/pages/home/MetaHelpDialog.tsx:134
 msgid "Naming convention"
 msgstr "命名規則"
 
-#: src/pages/home/MetaTagPanel.tsx:55
+#: src/pages/home/MetaTagPanel.tsx:64
 msgid "No meta tags detected in this HTML"
 msgstr "このHTMLにメタタグは検出されませんでした"
 
-#: src/pages/home/RenderForm.tsx:81
+#: src/pages/home/RenderForm.tsx:88
 msgid "None"
 msgstr "なし"
 
-#: src/pages/home/RenderForm.tsx:75
+#: src/pages/home/RenderForm.tsx:82
 msgid "None (Illustration)"
 msgstr "なし（イラストモード）"
 
-#: src/pages/home/MetaHelpDialog.tsx:93
+#: src/pages/home/AdvancedOptions.tsx:100
+msgid "On Render callback (window fn)"
+msgstr "レンダー時コールバック（window 関数名）"
+
+#: src/pages/home/MetaHelpDialog.tsx:104
 msgid "Option"
 msgstr "オプション"
 
-#: src/pages/home/RenderForm.tsx:268
+#: src/pages/home/RenderForm.tsx:293
 msgid "Paper Format"
 msgstr "用紙サイズ"
 
@@ -162,35 +178,47 @@ msgstr "用紙サイズ"
 msgid "Paste your HTML here..."
 msgstr "ここにHTMLを貼り付けてください..."
 
+#: src/pages/home/RenderForm.tsx:68
+msgid "PDF preview"
+msgstr "PDFプレビュー"
+
 #: src/pages/home/Home.tsx:25
 msgid "Powered by Chromium & Hono"
 msgstr "Chromium と Hono で動作"
 
-#: src/pages/home/MetaHelpDialog.tsx:146
+#: src/pages/home/MetaHelpDialog.tsx:160
 msgid "Prefixes in order: crisprender · crisp-render · cr · (none)"
 msgstr "プレフィックスの順序：crisprender · crisp-render · cr · （なし）"
 
-#: src/pages/home/RenderForm.tsx:61
+#: src/pages/home/RenderForm.tsx:60
 msgid "Preview PDF"
 msgstr "PDFをプレビュー"
 
-#: src/pages/home/RenderForm.tsx:254
+#: src/pages/home/AdvancedOptions.tsx:117
+msgid "Prune invisible content"
+msgstr "不可視コンテンツを除去"
+
+#: src/pages/home/RenderForm.tsx:279
 msgid "Scale"
 msgstr "スケール"
 
-#: src/pages/home/AdvancedOptions.tsx:30
+#: src/pages/home/AdvancedOptions.tsx:33
 msgid "Show advanced options ▼"
 msgstr "詳細設定を表示 ▼"
 
-#: src/pages/home/MetaHelpDialog.tsx:127
+#: src/pages/home/RenderForm.tsx:57
+msgid "Show PDF preview"
+msgstr "PDFプレビューを表示"
+
+#: src/pages/home/MetaHelpDialog.tsx:141
 msgid "Style"
 msgstr "スタイル"
 
-#: src/pages/home/MetaHelpDialog.tsx:155
+#: src/pages/home/MetaHelpDialog.tsx:169
 msgid "The legacy name \"pdf-target-selector\" is also accepted as an alias for \"selector\"."
 msgstr "旧名称 \"pdf-target-selector\" も \"selector\" のエイリアスとして受け入れられます。"
 
-#: src/pages/home/MetaHelpDialog.tsx:94
+#: src/pages/home/MetaHelpDialog.tsx:105
 msgid "Type"
 msgstr "タイプ"
 
@@ -199,7 +227,7 @@ msgstr "タイプ"
 msgid "URL"
 msgstr "URL"
 
-#: src/pages/home/MetaHelpDialog.tsx:77
+#: src/pages/home/MetaHelpDialog.tsx:88
 msgid "Using Meta Tags for Configuration"
 msgstr "設定へのメタタグの使用"
 
@@ -207,22 +235,22 @@ msgstr "設定へのメタタグの使用"
 msgid "Vector-perfect PDF rendering from HTML"
 msgstr "HTMLからベクター完全なPDFを生成"
 
-#: src/pages/home/AdvancedOptions.tsx:51
+#: src/pages/home/AdvancedOptions.tsx:54
 msgid "Viewport Height (px)"
 msgstr "ビューポート高さ（px）"
 
-#: src/pages/home/AdvancedOptions.tsx:37
+#: src/pages/home/AdvancedOptions.tsx:40
 msgid "Viewport Width (px)"
 msgstr "ビューポート幅（px）"
 
-#: src/pages/home/AdvancedOptions.tsx:66
+#: src/pages/home/AdvancedOptions.tsx:69
 msgid "Wait After Load (ms)"
 msgstr "ロード後の待機時間（ms）"
 
-#: src/pages/home/MetaHelpDialog.tsx:81
+#: src/pages/home/MetaHelpDialog.tsx:92
 msgid "What are meta tag options?"
 msgstr "メタタグオプションとは何ですか？"
 
-#: src/pages/home/MetaHelpDialog.tsx:83
+#: src/pages/home/MetaHelpDialog.tsx:94
 msgid "You can embed CrispRender render settings directly inside the HTML document using <meta> tags. These values act as defaults and are overridden by any option you set in the form."
 msgstr "CrispRender のレンダリング設定を <meta> タグを使用して HTML ドキュメントに直接埋め込むことができます。これらの値はデフォルトとして機能し、フォームで設定したオプションに上書きされます。"

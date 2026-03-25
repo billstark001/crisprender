@@ -10,7 +10,7 @@ import { MetaTagPanel } from './MetaTagPanel.js';
 import { AdvancedOptions } from './AdvancedOptions.js';
 import { MetaHelpDialog } from './MetaHelpDialog.js';
 import { extractMetaOptionsFromHtml, type MetaRenderOptions } from '@/utils/metaOptions.js';
-import { form, formLayout, formSide, row, resultArea, errorText, successLink } from './RenderForm.css.js';
+import { form, formLayout, formSide, row, resultArea, errorText, successLink, pdfPreview } from './RenderForm.css.js';
 import { MessageDescriptor } from '@lingui/core';
 
 function extractSuggestedName(source: HtmlSourceValue): string {
@@ -42,12 +42,6 @@ export function ResultArea({ pdfUrl, error, suggestedName = 'output' }: ResultAr
   const { i18n } = useLingui();
   const [previewOpen, setPreviewOpen] = useState(false);
   if (!pdfUrl && !error) return null;
-  const handlePreview = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (pdfUrl) {
-      window.open(pdfUrl, '_blank', 'noopener');
-    }
-  };
   return (
     <div className={resultArea}>
       {error && <p className={errorText}>{error}</p>}
@@ -57,10 +51,23 @@ export function ResultArea({ pdfUrl, error, suggestedName = 'output' }: ResultAr
             {i18n._(msg`Download PDF`)}
           </a>
           <span style={{ marginLeft: 16 }}>
-            <a className={successLink} href={pdfUrl} target="_blank" rel="noopener" onClick={handlePreview}>
-              {i18n._(msg`Preview PDF`)}
-            </a>
+            <button
+              type="button"
+              className={successLink}
+              aria-label={previewOpen ? i18n._(msg`Hide PDF preview`) : i18n._(msg`Show PDF preview`)}
+              onClick={() => setPreviewOpen((v) => !v)}
+            >
+              {previewOpen ? i18n._(msg`Hide Preview`) : i18n._(msg`Preview PDF`)}
+            </button>
           </span>
+          {previewOpen && (
+            <embed
+              className={pdfPreview}
+              src={pdfUrl}
+              type="application/pdf"
+              title={i18n._(msg`PDF preview`)}
+            />
+          )}
         </>
       )}
     </div>
@@ -109,6 +116,9 @@ export function RenderForm() {
     viewportWidth: '',
     viewportHeight: '',
     waitAfterLoad: '',
+    injectAttribute: '',
+    onRender: '',
+    pruneInvisible: '',
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -152,6 +162,16 @@ export function RenderForm() {
 
     const wal = advancedValues.waitAfterLoad.trim() || (detectedMeta.waitAfterLoad !== undefined ? String(detectedMeta.waitAfterLoad) : '0');
     lines.push(`<meta name="crisprender-wait-after-load" content="${wal}">`);
+
+    const ia = advancedValues.injectAttribute === 'true'
+      || (advancedValues.injectAttribute === '' && detectedMeta.injectAttribute !== false);
+    lines.push(`<meta name="crisprender-inject-attribute" content="${ia}">`);
+
+    const or = advancedValues.onRender.trim() || detectedMeta.onRender || '';
+    lines.push(`<meta name="crisprender-on-render" content="${or}">`);
+
+    const pi = advancedValues.pruneInvisible === 'true' || (advancedValues.pruneInvisible === '' && detectedMeta.pruneInvisible === true);
+    lines.push(`<meta name="crisprender-prune-invisible" content="${pi}">`);
 
     return lines.join('\n');
   };
@@ -199,6 +219,11 @@ export function RenderForm() {
       if (!isNaN(vh) && vh > 0) body.viewportHeight = vh;
       const wal = parseInt(advancedValues.waitAfterLoad, 10);
       if (!isNaN(wal) && wal >= 0) body.waitAfterLoad = wal;
+      if (advancedValues.injectAttribute === 'true') body.injectAttribute = true;
+      else if (advancedValues.injectAttribute === 'false') body.injectAttribute = false;
+      if (advancedValues.onRender.trim()) body.onRender = advancedValues.onRender.trim();
+      if (advancedValues.pruneInvisible === 'true') body.pruneInvisible = true;
+      else if (advancedValues.pruneInvisible === 'false') body.pruneInvisible = false;
 
       const res = await fetch('/api/v1/pdf/generate', {
         method: 'POST',
