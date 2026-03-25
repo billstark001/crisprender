@@ -45,9 +45,30 @@ See [docs/development.md](docs/development.md) for full setup instructions and t
 | `viewportWidth`   | `number`               | Headless browser viewport width in px, default `1280`                                                 |
 | `viewportHeight`  | `number`               | Headless browser viewport height in px, default `900`                                                 |
 | `waitAfterLoad`   | `number`               | Extra ms to wait after `networkidle0` before rendering, default `0`                                   |
-| `pruneInvisible`  | `boolean`              | Scroll to the element and shrink the viewport before capturing to reduce output file size, default `false` |
+| `pruneInvisible`  | `boolean`              | Scroll to the element and shrink the viewport before capturing to reduce output file size. When enabled, applies a Ghostscript + qpdf optimization pipeline via stdio pipes (memory-efficient). Concurrency is limited to prevent resource exhaustion. Default: `false` |
 
 Returns `application/pdf`.
+
+### Ghostscript + qpdf PDF Optimization
+
+When `pruneInvisible` is enabled, the rendered PDF is automatically optimized using a two-step pipeline:
+
+- Step 1: Ghostscript compression
+- Step 2: qpdf linearization and image optimization
+
+- **Processing method**: Ghostscript uses stdio streaming; qpdf output is streamed via stdout, and input is written to a temporary file (qpdf does not support PDF input from stdin)
+- **Quality preset**: `ebook` (balanced compression and quality)
+- **Optimizations applied**:
+  - Font compression
+  - Duplicate image detection and removal
+  - Content compression
+  - Resolution optimization (150 DPI)
+  - qpdf `--linearize` for faster web viewing
+  - qpdf `--optimize-images` for additional image optimization
+- **Concurrency control**: Processing is limited to prevent resource exhaustion (max ~2-3 concurrent Ghostscript processes with default 5-page browser concurrency)
+- **Fallback**: If Ghostscript or qpdf processing fails, the original PDF is returned without optimization
+
+**Requirements**: Ghostscript and qpdf must be installed on the system. In Docker deployments, both are automatically included.
 
 ### Embedding render options via `<meta>` tags
 

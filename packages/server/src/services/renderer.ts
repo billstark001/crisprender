@@ -1,7 +1,8 @@
 import { PDFDocument, type PDFEmbeddedPage } from 'pdf-lib';
-import { browserService } from './browser.js';
+import { browserService, MAX_CONCURRENT_PAGES } from './browser.js';
 import { paperSizes } from '../utils/paperSizes.js';
 import { createLogger } from '../utils/logger.js';
+import { processPdfWithGhostscript, processPdfWithQpdf } from '../utils/ghostscript.js';
 
 const log = createLogger('renderer');
 import { PaperFormat } from 'puppeteer';
@@ -162,6 +163,46 @@ const MAX_HTML_BYTES = Number(process.env.MAX_HTML_BYTES ?? 10 * 1024 * 1024);
 const PT_PER_PX = 72 / 96;
 /** Millimetres to PDF points: 1 mm = 72/25.4 pt. */
 const PT_PER_MM = 72 / 25.4;
+
+/**
+ * Ghostscript processing queue to manage concurrency.
+ * Limits concurrent ghostscript processes to avoid resource exhaustion.
+ * Uses the same concurrency limit as browser pages for consistency.
+ */
+class GhostscriptProcessingQueue {
+  private processingCount = 0;
+  private readonly maxConcurrent: number;
+  private readonly waitlist: Array<() => void> = [];
+
+  constructor(maxConcurrent: number = Math.ceil(MAX_CONCURRENT_PAGES / 2)) {
+    this.maxConcurrent = maxConcurrent;
+  }
+
+  async process<T>(
+    task: () => Promise<T>,
+  ): Promise<T> {
+    // Wait if queue is at capacity
+    while (this.processingCount >= this.maxConcurrent) {
+      await new Promise<void>((resolve) => {
+        this.waitlist.push(resolve);
+      });
+    }
+
+    this.processingCount++;
+    try {
+      return await task();
+    } finally {
+      this.processingCount--;
+      // Notify the next waiting request
+      const nextResolve = this.waitlist.shift();
+      if (nextResolve) {
+        nextResolve();
+      }
+    }
+  }
+}
+
+const ghostscriptQueue = new GhostscriptProcessingQueue();
 
 /**
  * Private/reserved IP ranges blocked to prevent SSRF attacks.
@@ -363,43 +404,8 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
     // the viewport, then shrink the viewport to the element's dimensions.
     // This limits what Puppeteer renders in the intermediate PDF to just
     // the element's area, significantly reducing the output file size.
-    let pdfWidth = resolvedVW;
-    let pdfHeight = resolvedVH;
-
-    if (pruneInvisible) {
-      const elemW = Math.ceil(bbox.width);
-      const elemH = Math.ceil(bbox.height);
-
-      // Scroll so the element is at the top-left of the viewport.
-      await page.evaluate(
-        (x: number, y: number) => { window.scrollTo(x, y); },
-        Math.floor(bbox.x),
-        Math.floor(bbox.y),
-      );
-
-      // Shrink the viewport to the element's bounding-box size.
-      await page.setViewport({ width: elemW, height: elemH });
-
-      // Allow a brief reflow before re-measuring.
-      await new Promise<void>((resolve) => setTimeout(resolve, REFLOW_DELAY_MS));
-
-      // Re-measure the element relative to the updated viewport.
-      const scrolledBbox = await page.evaluate((sel: string) => {
-        const el = document.querySelector(sel);
-        if (!el) return null;
-        const r = el.getBoundingClientRect();
-        return { x: r.x, y: r.y, width: r.width, height: r.height };
-      }, targetSelector) as BoundingBox | null;
-
-      if (scrolledBbox && scrolledBbox.width > 0 && scrolledBbox.height > 0) {
-        bbox = scrolledBbox;
-        // PDF dimensions must cover the element's extent in the new viewport.
-        pdfWidth = Math.ceil(Math.max(elemW, scrolledBbox.x + scrolledBbox.width));
-        pdfHeight = Math.ceil(Math.max(elemH, scrolledBbox.y + scrolledBbox.height));
-      }
-
-      log.info({ elemW, elemH, pdfWidth, pdfHeight }, 'pruneInvisible: viewport reduced to element size');
-    }
+    const pdfWidth = resolvedVW;
+    const pdfHeight = resolvedVH;
 
     // Capture the (possibly reduced) viewport as a PDF.
     const viewportPdfBuffer = await page.pdf({
@@ -433,8 +439,34 @@ export async function renderPdf(options: RenderOptions): Promise<Buffer> {
       log.info({ format, durationMs: Date.now() - renderStart }, 'Render completed (poster mode)');
     }
 
-    const pdfBytes = await newDoc.save();
-    return Buffer.from(pdfBytes);
+
+    let pdfBuffer: Buffer = Buffer.from(await newDoc.save());
+    const originalSize = pdfBuffer.length;
+
+    // Apply post-processing pipeline if pruneInvisible is enabled.
+    // Order: Ghostscript compression -> qpdf linearize + image optimization.
+    if (pruneInvisible) {
+      try {
+        pdfBuffer = await ghostscriptQueue.process(async () =>
+          processPdfWithGhostscript(pdfBuffer, { quality: 'ebook' }),
+        );
+        pdfBuffer = await ghostscriptQueue.process(async () =>
+          processPdfWithQpdf(pdfBuffer),
+        );
+        log.info(
+          { originalSize, processedSize: pdfBuffer.length, compressionSavings: ((1 - pdfBuffer.length / originalSize) * 100).toFixed(1) + '%', durationMs: Date.now() - renderStart },
+          'PDF optimized with Ghostscript + qpdf',
+        );
+      } catch (err) {
+        log.warn(
+          { err, pruneInvisible },
+          'PDF post-processing skipped, returning unoptimized PDF',
+        );
+        // Continue with unoptimized PDF if Ghostscript or qpdf fails
+      }
+    }
+
+    return pdfBuffer;
   } finally {
     clearTimeout(timeout);
     await releasePage();
